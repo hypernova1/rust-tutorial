@@ -46,7 +46,7 @@ fn main() {
     /*
         백터 이터레이터
     */
-    let v = vec![100, 32, 57];
+    let mut v = vec![100, 32, 57];
     for i in &mut v {
         *i += 50; // *: 역참조 연산자 (가변 참조자가 참고하는 값을 바꾸기 위해서)
     }
@@ -57,8 +57,8 @@ fn main() {
     let row = vec![
         SpreadsheetCell::Int(3),
         SpreadsheetCell::Float(2.3),
-        SpreadsheetCell::Text(String::from("hello"));
-    ]
+        SpreadsheetCell::Text(String::from("hello")),
+    ];
 
 }
 
