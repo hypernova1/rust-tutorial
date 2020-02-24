@@ -17,3 +17,19 @@ pub mod network; // network.rs 와 연결
 
 pub mod client; // client.rs 와 연결
 
+
+
+/*
+    super 를 사용하여 부모 모듈에 접근하기
+*/
+#[cfg(test)]
+mod tests {
+
+    use super::client;
+
+    #[test]
+    fn it_works() {
+        // super::client::connect(); // tests 모듈은 절대 경로가 필요한 듯
+        client::connect();
+    }
+}
