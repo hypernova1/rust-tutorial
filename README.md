@@ -22,7 +22,9 @@
 [3. 보편적인 프로그래밍 개념](#3-보편적인-프로그래밍-개념)
 * [3.1. 변수와 가변성](#31-변수와-가변성)
 * [3.2. 데이터 타입들](#32-데이터-타입들)
-  
+* [3.3. 함수 동작 원리](#33-함수-동작-원리)
+* [3.4. 주석](#34-주석)
+* [3.5. 제어문](#35-제어문)
 # 1. 시작하기
 ## 1.1. 설치하기
 ### Linux와 MacOS에서 Rustup 설치 커맨드 (러스트 안정화 버전)
@@ -261,3 +263,145 @@ let a = [1, 2, 3, 4, 5];
 let first = a[0]; //첫번째 요소 접근
 ~~~
 * 배열의 길이를 초과하는 요소에 접근하면 에러 발생 (rust에서는 panic 하다라고 표현하는 듯)
+<br>
+
+## 3.3 함수 동작 원리
+#### 1. 함수 선언하기
+~~~rust
+fn another_function() {
+    println!("Another function");
+}
+~~~
+#### 2. 함수의 매개 변수
+~~~rust
+fn main() {
+    another_function(5);
+}
+
+fn another_function(x: u32) { //타입 정의
+    println!("{}", x);
+}
+~~~
+
+#### 3. 함수 본문
+##### 3.1 구문과 표현식
+* 구문
+~~~rust
+let y = 6; //구문이기 때문에 반환값이 없음
+
+let x = (let y = 6); //error
+~~~
+* 함수
+~~~rust
+fn main() {
+    let x = 5;
+    
+    let y = { //표현식부
+        let x = 3;
+        x + 1 //반환값은 뒤에 세미콜론을 붙이지 않음
+    };
+    println!("{}", y); //4
+}
+~~~
+#### 4. 반환 값을 갖는 함수
+~~~rust
+fn five() -> i32 {
+    5
+}
+
+fn main() {
+    let x = five();
+    
+    println!("{}", x); //5
+}
+~~~
+##### 1. 잘못된 함수 반환 값의 예
+~~~rust
+fn main() {
+    let x = plus_one(5);
+
+    println!("{}", x);
+}
+
+fn plus_one(x: i32) -> i32 {
+    x + 1;  //반환 값이 아니라 구문이기 때문에 error
+}           //비어있는 튜플로 반환 됨 -> '()'
+~~~
+
+
+## 3.4 주석
+
+## 3.5 제어문
+#### 1. `if` 표현식
+~~~rust
+let number = 3;
+
+if number < 5 {
+    println!("condition was true");
+} else {
+    println!("condition was false");
+}
+~~~
+* 코드의 조건은 반드시 `bool`이어야 함
+~~~rust
+let number = 3;
+
+if number {
+    println!("number is three"); //bool이 아니고 정수형이라서 error
+}
+~~~
+
+#### 2. `else if`
+~~~rust
+let number = 6;
+
+if number % 2 == 0 {
+    println!("number is even");
+} else if number % 2 == 1 {
+    println!("number is odd");
+} else {
+    println!("number is error");
+}
+~~~
+
+#### 3. `let`구문에서 `if`사용하기
+~~~rust
+let condition = ture;
+let number  = if condition {
+    5
+} else {
+    6
+};
+~~~
+
+#### 4. 반복문과 반복
+##### 4.1 `loop`
+~~~rust
+loop {
+    println!("againt");
+}
+~~~
+* 프로그램을 강제 종료하기 전까지 again 반복
+##### 5.2 `while`
+~~~rust
+let mut number = 3;
+
+while number != 0 {
+    println!("{}", number);
+
+    number = number - 1;
+}
+~~~
+#### 5.2 `for`을 사용하여 콜렉션 반복
+~~~rust
+let a = [10, 20, 30, 40, 50];
+
+for element in a.iter() {
+    println!("{}", element);
+}
+~~~
+~~~rust
+for number in (1..4).rev() { //(1..4): Range
+    println!("{}", number);
+}
+~~~
