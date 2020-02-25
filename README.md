@@ -23,14 +23,14 @@
 * [3.1. 변수와 가변성](#31-변수와-가변성)
 * [3.2. 데이터 타입들](#32-데이터-타입들)
   
-# 1. 시작하기  
-## 1.1. 설치하기  
+# 1. 시작하기
+## 1.1. 설치하기
 ### Linux와 MacOS에서 Rustup 설치 커맨드 (러스트 안정화 버전)
 ~~~
 $ curl https://sh.rustup.rs -sSf | sh
-~~~  
-  
-#### 1. 커맨드 재시작 없이 바로 시작하기    
+~~~
+
+#### 1. 커맨드 재시작 없이 바로 시작하기
 ~~~
 $ source $HOME/.cargo/env
 ~~~
@@ -38,23 +38,24 @@ $ source $HOME/.cargo/env
 #### 2. ~/bash_profile에 추가하기
 ~~~
 $ export PATH="$HOME/.cargo/bin:$PATH"
-~~~   
-### Windows에서 Rustup 설치  
-<https://www.rust-lang.org/en-US/install.html> 접속 후 설치 진행    
-  
+~~~
+
+### Windows에서 Rustup 설치
+<https://www.rust-lang.org/en-US/install.html> 접속 후 설치 진행
+
 ### 버전확인
 ~~~
 rustc --version
-~~~   
+~~~
 ### 로컬 문서 실행
 ~~~
 rustup doc
-~~~  
+~~~
   
-<br>  
-  
+<br>
+
 ## 1.2. Hello, World!
-#### 프로그램 작성 및 실행  
+#### 프로그램 작성 및 실행
 Filename: main.rs
 ~~~rust
 fn main() {
@@ -65,12 +66,11 @@ fn main() {
 $ rustc main.rs
 $ ./main        <- Linux or MacOS
 > .\main.exe    <- Windows
-Hello, world! 
+Hello, world!
 ~~~
 * 러스트는 탭이 아닌 네개의 스페이스로 들여쓰기를 함
-* println!: 러스트 매크로(함수가 아님)
+* `println!`: 러스트 매크로(함수가 아님)
 * 컴파일과 실행은 개별적 단계
-    
 <br>
 
 ## 1.3. Hello, Cargo!
@@ -85,7 +85,7 @@ $ cargo --version
 ~~~
 $ cargo new [project name] --bin
 ~~~
-* 옵션: --lib(라이브러리), --bin(실행파일) ...
+* 옵션: `--lib`(라이브러리), `--bin`(실행파일) ...
 
 #### 3. 프로젝트 구조
 ~~~
@@ -107,8 +107,8 @@ authors = ["Your Name <you@example.com>"]
 #### 5. 프로젝트 빌드 및 실행
 * 빌드
     * 파일 생성 위치
-        * ./target/debug/[project name] (Linux, MacOS)
-        * .\target\debug\[project name].exe (Windows)
+        * `./target/debug/[project name]` (Linux, MacOS)
+        * `.\target\debug\[project name].exe` (Windows)
 ~~~
 $ cargo build
 ~~~
@@ -152,7 +152,7 @@ x = 1; //OK
 ~~~
 
 #### 3. 상수(*const*)
-* mut 키워드 사용 불가
+* `mut` 키워드 사용 불가
 * 어느 영역에서든지 선언 가능
 * 선언되어 있는 영역 내에서 프로그램이 실행되는 동안 항상 유용함
 * 상수 표현식만 사용 가능 (함수 호출 결과값 및 실행시간에 결정되는 값이 할당될 수 없음)
@@ -167,7 +167,7 @@ let x = x + 1;
 let x = x * 2;
 println!("{}", x); // 12
 ~~~
-* mut 키워드와의 차이점
+* `mut` 키워드와의 차이점
     * 변경 후에는 불변성 유지
     * 타입 변경 가능 (불필요한 변수 선언 방지)
 ~~~
@@ -222,7 +222,7 @@ let y: f32 = 3.0    // f32
 ~~~
 
 ##### 2.3. Boolean 타입
-* true 와 false 로 표현
+* `true` 와 `false` 로 표현
 ~~~rust
 let t = true;
 let f: bool = false;
