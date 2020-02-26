@@ -28,6 +28,8 @@
 
 [4. 소유권(Ownership)](#4-소유권ownership)
 * [4.1 소유권이란?](#41-소유권이란)
+* [4.2 참조자(References)와 빌림(Borrowing)](#42-참조자references와-빌림borrowing)
+* [4.3 슬라이스(Slices)](#43-슬라이스slices)
 # 1. 시작하기
 ## 1.1. 설치하기
 ### Linux와 MacOS에서 Rustup 설치 커맨드 (러스트 안정화 버전)
@@ -159,7 +161,7 @@ x = 1; //OK
 ### 3. 상수(*const*)
 * `mut` 키워드 사용 불가
 * 어느 영역에서든지 선언 가능
-* 선언되어 있는 영역 내에서 프로그램이 실행되는 동안 항상 유용함
+* 선언되어 있는 영역 내에서 프로그램이 실행되는 동안 항상 유효함
 * 상수 표현식만 사용 가능 (함수 호출 결과값 및 실행시간에 결정되는 값이 할당될 수 없음)
 ~~~
 const MAX_POINTS: u32 = 100_000;
@@ -332,9 +334,9 @@ fn plus_one(x: i32) -> i32 {
 ~~~
 
 
-## 3.4 주석
+## 3.4. 주석
 
-## 3.5 제어문
+## 3.5. 제어문
 ### 1. `if` 표현식
 ~~~rust
 let number = 3;
@@ -559,4 +561,237 @@ fn calculate_length(s: String) -> (String, usize) {
 
     (s, length)
 }
+~~~
+<br>
+
+### 4.2. 참조자(References)와 빌림(Borrowing)
+#### 1. 함수에 값을 넘길 때 *소유권*(Ownership)을 넘기는 대신 개체에 대한 *참조자*(References)를 인자로 사용
+~~~rust
+fn main() {
+  let s1 = String::from("hello");
+
+  let len = calculate_length(&s1);
+
+  println!("The length of '{}' is {}.", s1, len); //OK
+
+}
+
+fn calculate_length(s: &String) -> usize { //s는 스트링의 참조자형(빌림)
+  s.len()
+} //s는 스코프를 벗어났지만 가리키고 있는 값에 대한 소유권이 없기 때문에 아무일도 발생하지 않음
+~~~
+
+#### 2. 참조자 변경은 기본적으로 허용되지 않음(*불변*)
+~~~rust
+fn main() {
+  let s = String::from("hello");
+
+  change(&s);
+}
+
+fn change(some_string: &String) {
+  some_string.push_str(", world"); //error
+}
+~~~
+
+#### 3. 가변 참조자(Mutalble References)
+~~~rust
+fn main() {
+  let mut s = String::from("hello");
+
+  change(&mut s);
+}
+
+fn change(some_string: &mut String) { //some_string은 가변 참조자
+  some_string.push_str(", world"); //OK
+}
+~~~
+  * 특정한 스코프 내에서 특정한 데이터 조각에 대한 가변참조자를 딱 하나 생성 가능
+~~~rust
+let mut s = String::from("hello");
+
+let r1 = &mut s;
+let r2 = &mut s; //error
+~~~
+* 데이터 레이스를 방지하기 위함
+    * 데이터 레이스는 아래의 세가지 동작이 발생했을 때 나타나는 레이스 조건
+        1. 두 개 이상의 포인터가 동시에 같은 데이터에 접근
+        2. 그 중 적어도 하나의 포인터가 데이터를 씀
+        3. 데이터에 접근하는데 동기화를 하는 어떠한 메커니즘도 없음
+
+##### 3.1 데이터 레이스 방지
+~~~rust
+let mut s = String::from("hello");
+{
+  let r1 = &mut s;
+} //r1은 스코프를 벗어났으므로 drop
+
+let rs = &mut s; //OK
+~~~
+
+##### 3.2 가변 참조자와 불변 참조자 혼용
+~~~rust
+let mut s = String::from("hello");
+
+let r1 = &s; //OK
+let r2 = &s; //OK
+let r2 = &mut s; //error
+~~~
+* 불변 참조자를 가지고 있을 동안에도 가변 참조자를 만들 수 없음
+
+#### 4. 댕글링 참조자(Dangling References)
+~~~rust
+fn main() {
+  let reference_to_nothing = dangle(); //error
+}
+
+fn dangle() -> &String { // String 참조자를 반환
+  let s = String::from("hello"); //s는 새로운 String
+
+  &s // s의 참조자를 반환
+} //s가 스코프를 벗어나서 drop 됨(메모리가 사라짐)
+~~~
+* 해결 방법: `String`을 직접 반환
+~~~rust
+fn no_dangle() -> String {
+  let s = String::from("hello");
+
+  s
+}
+~~~
+### **참조자의 규칙**
+1. 어떤 경우든 아래 항목의 하나만 가질 수 있음
+   * 하나의 가변 참조자
+   * 임의 개수의 불변 참조자
+2. 참조자는 항상 유효해야함
+
+
+## 4.3. 슬라이스(Slices)
+### 1. 소유권을 갖지 않는 타입
+~~~rust
+fn first_word(s: &String) -> usize {
+  let bytes = s.as_bytes();
+  for (i, &item) in bytes.iter().enumerate() {
+    if item == b' ' {
+      return i;
+    }
+  }
+
+  s.len()
+}
+~~~
+
+#### 코드 상세
+~~~rust
+let bytes = s.as_bytes();
+~~~
+1.  `String`을 `byte`배열로 변환
+
+~~~rust
+for (i, &item) in bytes.iter().enumerate() {}
+~~~
+2.  `iter`: `byte`배열의 각 요소 반환
+3.  `enumerate`: `iter`의 결과 값 직접 반환 대신 감싸서 *튜플*로 반환
+      * `for`루프 내에서 `i`는 인덱스, `&item`은 튜플 내의 한 바이트에 대응
+      * `iter().enumerate()`의 요소에 대한 참조자를 가지므로 `&` 사용
+
+~~~rust
+  if item == b' ' {
+    return i;
+  }
+}
+
+s.len()
+~~~
+4. 공백 문자를 찾았다면 위치(index)를 반환  
+5. 아니면 `String`의 길이를 반환
+* 문제점
+  * `usize`를 반환하고 있지만 `&String`의 내용물 안에서만 유효
+  * `len`이 기존의 `String`으로 부터 분리되어 있기 때문에 나중에도 여전히 유효한지 알 수 없음
+
+### 2. `String`과 `len`분리 시키지 않는 로직
+#### 1. 기존 로직의 문제점
+~~~rust
+fn main() {
+  let mut s = String::from("hello world");
+
+  let word = first_word(&s);  //5
+
+  s.clear();                  //String을 비워서 ""로 만듬
+
+  //word는 여전히 5를 가지고 있지만 5라는 값을 의미있게 쓸 수 있는 String은 없음
+} //word drop
+~~~
+
+### 2. 해결방법 : 스트링 슬라이스
+#### 2.1. 스트링 슬라이스(`&str`)
+~~~rust
+let s = String::from("hello world");
+let hello = &s[0..5];
+let world = &s[6..11];
+~~~
+![슬라이스](https://rinthel.github.io/rust-lang-book-ko/img/trpl04-06.svg)
+
+#### 2.2. 스트링 슬라이스 반환
+~~~rust
+
+fn main() {
+  let mut s = String::from("hello world");
+
+  let word = first_word(&s);
+
+  // s.clear(); //error
+  println!("{}", word);
+}
+
+fn first_word(s: &String) -> &str {
+  let bytes = s.as_bytes();
+
+  for (i, &item) in bytes.iter().enumerate() {
+    if item == b' ' {
+      return &s[0..i];
+    }
+  }
+
+  &s[..]
+}
+~~~
+* `clear`함수가 `String`을 잘라낼 때 가변 참조자를 가지지 못해서 생기는 오류 (이미 가변 참조자가 사용되고 있기 때문)
+
+#### 2.3. 스트링 리터럴은 슬라이스이다.
+#### 2.4. 파라미터로서의 스트링 슬라이스
+~~~rust
+fn main() {
+  let my_string = String::from("hello world");
+
+  //first_word가 'String'의 슬라이스로 동작함
+  let word = first_word(&my_string);
+
+  let my_string_literal = "hello world";
+
+  //my_string_literal이 'String'슬라이스로 동작함
+  let word = first_word(&my_string_leteral[..]);
+
+  //스트링 리터럴은 슬라이스이기 때문에 동작
+  let word = first_word(my_string_literal);
+}
+
+fn first_word(s: &str) -> &str { //&String -> &str
+  let bytes = s.as_bytes();
+
+  for (i, &item) in bytes.iter().enumerate() {
+    if item == b' ' {
+      return &s[0..i];
+    }
+  }
+
+  &s[..]
+}
+~~~
+
+#### 2.5. 그 밖의 슬라이스들
+~~~rust
+let a = [1, 2, 3, 4, 5];
+
+let slice = &a[1..3];
 ~~~
