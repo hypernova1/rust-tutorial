@@ -42,12 +42,12 @@
 $ curl https://sh.rustup.rs -sSf | sh
 ~~~
 
-### 1. 커맨드 재시작 없이 바로 시작하기
+### I. 커맨드 재시작 없이 바로 시작하기
 ~~~
 $ source $HOME/.cargo/env
 ~~~
 
-### 2. ~/bash_profile에 추가하기
+### II. ~/bash_profile에 추가하기
 ~~~
 $ export PATH="$HOME/.cargo/bin:$PATH"
 ~~~
@@ -88,18 +88,18 @@ Hello, world!
 ## 1.3. Hello, Cargo!
 ### **Cargo**(카고)
 * 러스트 빌드 시스템 및 패키지 매니저 (rustup 설치시 자동으로 설치)
-### 1. 버전확인
+### I. 버전확인
 ~~~
 $ cargo --version
 ~~~
 
-### 2. 프로젝트 생성
+### II. 프로젝트 생성
 ~~~
 $ cargo new [project name] --bin
 ~~~
 * 옵션: `--lib`(라이브러리), `--bin`(실행파일) ...
 
-### 3. 프로젝트 구조
+### III. 프로젝트 구조
 ~~~
 project/
     -src/       <-- 소스파일 디렉토리
@@ -107,7 +107,7 @@ project/
     -Cargo.toml <-- Cargo 환경설정 파일
 ~~~
 
-### 4. Cargo.toml 구조
+### IV. Cargo.toml 구조
 ~~~
 [package]                                   <-- 프로젝트 정보
 name = "hello_cargo"
@@ -116,7 +116,7 @@ authors = ["Your Name <you@example.com>"]
 [dependencies]                              <-- 의존성 리스트 섹션
 ~~~
 
-### 5. 프로젝트 빌드 및 실행
+### V. 프로젝트 빌드 및 실행
 * 빌드
     * 파일 생성 위치
         * `./target/debug/[project name]` (Linux, MacOS)
@@ -139,7 +139,7 @@ $ cargo build --release
 ~~~
 
 
-### 6. 관련 문서
+### VI. 관련 문서
 <https://doc.rust-lang.org/cargo/>
 
 <br>
@@ -151,19 +151,19 @@ $ cargo build --release
 # 3. 보편적인 프로그래밍 개념
 
 ## 3.1. 변수와 가변성
-### 1. 기본 변수(let, const)는 불변성 (*immutable*)
+### I. 기본 변수(let, const)는 불변성 (*immutable*)
 ~~~
 let x = 0;
 x = 1 //컴파일 에러
 ~~~
 
-### 2. mut 접두어를 붙이면 가변성 (*mutable*)
+### II. mut 접두어를 붙이면 가변성 (*mutable*)
 ~~~rust
 let mut x = 0;
 x = 1; //OK
 ~~~
 
-### 3. 상수(*const*)
+### III. 상수(*const*)
 * `mut` 키워드 사용 불가
 * 어느 영역에서든지 선언 가능
 * 선언되어 있는 영역 내에서 프로그램이 실행되는 동안 항상 유효함
@@ -172,7 +172,7 @@ x = 1; //OK
 const MAX_POINTS: u32 = 100_000;
 ~~~
 
-### 4. Shadowing
+### IV. Shadowing
 ~~~
 let x = 5;
 let x = x + 1;
@@ -192,15 +192,15 @@ spaces = spaces.len(); // 컴파일 에러
 <br>
 
 ## 3.2. 데이터 타입들
-### 1. 데이터 타입 명시
+### I. 데이터 타입 명시
 ~~~
 let guess: u32 = "32".parse().expect("Not a number!");
 ~~~
-### **2. 스칼라 타입들**
+### **II. 스칼라 타입들**
 * 스칼라: 하나의 값으로 표현되는 타입
     * 종류: 정수형, 부동소수점 숫자, boolean, 문자
 
-#### 2.1.1. 정수형: 소수점이 없는 숫자
+#### II.i. 정수형: 소수점이 없는 숫자
 | Length | Signed | Unsigned |
 |:--------|:--------|--------|
 | 8-bit | i8 | u8 |
@@ -215,7 +215,7 @@ let guess: u32 = "32".parse().expect("Not a number!");
     * ex) `1_000`
     * byte 리터럴을 제외한 모든 정수형은 `57u8`과 같은 타입의 접미사와 `_` 사용 가능
     
-#### 2.1.2.  정수형 리터럴들
+#### II.ii.  정수형 리터럴들
 | Number literals | Example |
 |:--------|:--------|
 | Decimal | `98_222` |
@@ -224,7 +224,7 @@ let guess: u32 = "32".parse().expect("Not a number!");
 | Binary | `0b1111_0000` |
 | Byte (`u8` only) | `b'A'` | 
 
-#### 2.2. 부동 소수점 타입
+#### II.iii. 부동 소수점 타입
 * 소수점을 갖는 타입
 * IEEE-754 표준에 따라 표현됨
 * `f32` (1배수 정밀도), `f64` (2배수 정밀도)
@@ -233,22 +233,22 @@ let x = 2.0;        // f64
 let y: f32 = 3.0    // f32
 ~~~
 
-#### 2.3. Boolean 타입
+#### II.iv. Boolean 타입
 * `true` 와 `false` 로 표현
 ~~~rust
 let t = true;
 let f: bool = false;
 ~~~ 
 
-#### 2.4. 문자타입
+#### II.v. 문자타입
 * char 타입
 ~~~rust
 let c = 'z';
 let z = 'Z';
 ~~~
 
-### 3. 복합 타입들
-#### 3.1 튜플
+### III. 복합 타입들
+#### III.i 튜플
 * 다양한 타입의 숫자들의 집합
 ~~~rust
 let tup: (i32, f64, u8) = (500, 6.4, 1);
@@ -262,7 +262,7 @@ let six_point_four = tup.1;
 let one = tup.2;
 ~~~
 
-#### 3.2 배열
+#### III.ii 배열
 * 여러 값들의 집합체
 * 튜플과 다르게 모든 요소는 **같은 타입**이어야 함
 * 한 번 선언되면 크기를 변경할 수 없음 (변경하고 싶으면 *vector* 를 사용)
@@ -276,13 +276,13 @@ let first = a[0]; //첫번째 요소 접근
 <br>
 
 # 3.3 함수 동작 원리
-### 1. 함수 선언하기
+### I. 함수 선언하기
 ~~~rust
 fn another_function() {
     println!("Another function");
 }
 ~~~
-### 2. 함수의 매개 변수
+### II. 함수의 매개 변수
 ~~~rust
 fn main() {
     another_function(5);
@@ -293,8 +293,8 @@ fn another_function(x: u32) { //타입 정의
 }
 ~~~
 
-### 3. 함수 본문
-#### 3.1 구문과 표현식
+### III. 함수 본문
+#### III.i. 구문과 표현식
 * 구문
 ~~~rust
 let y = 6; //구문이기 때문에 반환값이 없음
@@ -313,7 +313,7 @@ fn main() {
     println!("{}", y); //4
 }
 ~~~
-### 4. 반환 값을 갖는 함수
+### IV. 반환 값을 갖는 함수
 ~~~rust
 fn five() -> i32 {
     5
@@ -325,7 +325,7 @@ fn main() {
     println!("{}", x); //5
 }
 ~~~
-#### 4.1. 잘못된 함수 반환 값의 예
+#### IV.i. 잘못된 함수 반환 값의 예
 ~~~rust
 fn main() {
     let x = plus_one(5);
@@ -342,7 +342,7 @@ fn plus_one(x: i32) -> i32 {
 ## 3.4. 주석
 
 ## 3.5. 제어문
-### 1. `if` 표현식
+### I. `if` 표현식
 ~~~rust
 let number = 3;
 
@@ -361,7 +361,7 @@ if number {
 }
 ~~~
 
-### 2. `else if`
+### II. `else if`
 ~~~rust
 let number = 6;
 
@@ -374,7 +374,7 @@ if number % 2 == 0 {
 }
 ~~~
 
-### 3. `let`구문에서 `if`사용하기
+### III. `let`구문에서 `if`사용하기
 ~~~rust
 let condition = ture;
 let number  = if condition {
@@ -384,15 +384,15 @@ let number  = if condition {
 };
 ~~~
 
-### 4. 반복문과 반복
-#### 4.1 `loop`
+### IV. 반복문과 반복
+#### IV.i `loop`
 ~~~rust
 loop {
     println!("againt");
 }
 ~~~
 * 프로그램을 강제 종료하기 전까지 again 반복
-#### 5.2 `while`
+#### IV.ii `while`
 ~~~rust
 let mut number = 3;
 
@@ -402,7 +402,7 @@ while number != 0 {
     number = number - 1;
 }
 ~~~
-### 5.2 `for`을 사용하여 콜렉션 반복
+### IV.iii `for`을 사용하여 콜렉션 반복
 ~~~rust
 let a = [10, 20, 30, 40, 50];
 
@@ -420,7 +420,7 @@ for number in (1..4).rev() { //(1..4) => Range: 한 숫자에서 다른 숫자�
 
 ## 4. 소유권(Ownership)
 ### 4.1 소유권이란
-#### 1. 스택과 힙
+#### I. 스택과 힙
 스택과 힙 모두 코드상에서 런타임시에 사용할 수 있는 메모리지만 각기 다른 방식으로 구조화되어 있음
 * 스택
     * 받아들인 순서대로 값을 저장하고 반대 방향으로 값을 지움(LIFO)
@@ -435,26 +435,26 @@ for number in (1..4).rev() { //(1..4) => Range: 한 숫자에서 다른 숫자�
         * 스택에 포인터를 저장하는 것은 할당이라 표현하지 않음  
 * 스택에 포인터를 저장할 수 있지만 실제 데이터 사용시에는 포인터를 따라가야 함
 
-#### 2. 소유권 규칙
+#### II. 소유권 규칙
 1. 각각의 값은 해당값의 오너(*owner*)를 갖고 있음
 2. 한 번에 딱 하나의 오너만 존재
 3. 오너가 스코프 밖으로 벗어나면, 값은 버려짐(*dropped*)
 
-#### 3. 변수의 스코프
+#### III. 변수의 스코프
 ~~~rust
 {                       //s가 유효하지 않음 (선언되기 전)
     let s = "hello";    //s는 이 지점부터 유효
 }                       //스코프가 끝났기 때문에 s는 유효하지 않음
 ~~~
 
-#### 4. `String`타입
+#### IV. `String`타입
 * 일반적인 문자열은 불변
 * 만일 고정적이지 않은 값을 입력받고 싶다면 `String`을 써야함
-##### 4.1 선언 방법
+##### IV.i 선언 방법
 ~~~rust
 let s = String::from("hello"); //'::': 네임스페이스 연산자
 ~~~
-#### 4.2 문자열 변경
+#### IV.ii 문자열 변경
 ~~~rust
 let mut s = String::from("Hello");
 
@@ -462,7 +462,7 @@ s.push_str(", world!"); //push_str()은 해당 스트링 리터럴을 스트링�
 println!("{}", s); //Hello, world!
 ~~~
 
-#### 5. 메모리와 할당
+#### V. 메모리와 할당
 * 스트링 리터럴은 값을 컴파일시에 알 수 있기 때문에 빠르고 효율적이지만 문자열을 변경할 수가 없음
 * `String`타입은 변경 가능하고 커질 수 있는 텍스트를 지원하기 위해 만들어짐
     * 런타임시에 운영체제로부터 메모리가 요청되어야 함
@@ -470,7 +470,7 @@ println!("{}", s); //Hello, world!
     * `String`의 사용이 끝나면 운영체제에게 메모리를 반납해야함
         * 스코프를 벗어나면 반납
 
-#### 6. rust의 반납 방식
+#### VI. rust의 반납 방식
 ~~~rust
 {
     let s = String::from("hello"); //s는 여기서부터 유효함
@@ -478,7 +478,7 @@ println!("{}", s); //Hello, world!
 }                                  //스코프가 끝나고 s는 유효하지 않음(drop 호출)
 ~~~
 
-#### 7. 이동(`move`)
+#### VII. 이동(`move`)
 ~~~rust
 let s1 = String::from("hello");
 let s2 = x; //s1의 값이 s2로 이동 됨
@@ -492,7 +492,7 @@ println!("{}", x); //error
     ![2](https://rinthel.github.io/rust-lang-book-ko/img/trpl04-04.svg)
 
 
-#### 8. 클론(`clone`)
+#### VIII. 클론(`clone`)
 ~~~rust
 let s1 = String::from("hello");
 let s2 = s1.clone(); //데이터 복제(깊은 복사)
@@ -500,7 +500,7 @@ let s2 = s1.clone(); //데이터 복제(깊은 복사)
 println!("{}, {}", s1, s2); //OK
 ~~~
 
-#### 9. 복사(`copy`)
+#### IX. 복사(`copy`)
 * 정수형과 같은 컴파일시 크기가 결정되는 타입들은 스택에 저장되기 때문에 실제 복사본이 빠르게 만들어질 수 있음
 ~~~rust
 let x = 5;
@@ -509,7 +509,7 @@ let y = x;
 println!("{}-{}", x, y); //OK
 ~~~
     
-#### 10. 소유권과 함수
+#### X. 소유권과 함수
 ~~~rust
 fn main() {
     let s = String::from("hello");  //s가 스코프안으로 들어옴
@@ -531,7 +531,7 @@ fn makes_copy(some_integer: u32) { //some_integer가 스코프 안으로 들어�
 } //아무일도 발생하지 않음
 ~~~
 
-#### 11. 반환 값과 스코프
+#### XI. 반환 값과 스코프
 ~~~rust
 fn main() {
     let s1 = gives_ownership();         //반환 값을 s1에게 이동 시킴
@@ -570,7 +570,7 @@ fn calculate_length(s: String) -> (String, usize) {
 <br>
 
 ### 4.2. 참조자(References)와 빌림(Borrowing)
-#### 1. 함수에 값을 넘길 때 *소유권*(Ownership)을 넘기는 대신 개체에 대한 *참조자*(References)를 인자로 사용
+#### I. 함수에 값을 넘길 때 *소유권*(Ownership)을 넘기는 대신 개체에 대한 *참조자*(References)를 인자로 사용
 ~~~rust
 fn main() {
   let s1 = String::from("hello");
@@ -586,7 +586,7 @@ fn calculate_length(s: &String) -> usize { //s는 스트링의 참조자형(빌�
 } //s는 스코프를 벗어났지만 가리키고 있는 값에 대한 소유권이 없기 때문에 아무일도 발생하지 않음
 ~~~
 
-#### 2. 참조자 변경은 기본적으로 허용되지 않음(*불변*)
+#### II. 참조자 변경은 기본적으로 허용되지 않음(*불변*)
 ~~~rust
 fn main() {
   let s = String::from("hello");
@@ -599,7 +599,7 @@ fn change(some_string: &String) {
 }
 ~~~
 
-#### 3. 가변 참조자(Mutalble References)
+#### III. 가변 참조자(Mutalble References)
 ~~~rust
 fn main() {
   let mut s = String::from("hello");
@@ -624,7 +624,7 @@ let r2 = &mut s; //error
         2. 그 중 적어도 하나의 포인터가 데이터를 씀
         3. 데이터에 접근하는데 동기화를 하는 어떠한 메커니즘도 없음
 
-##### 3.1 데이터 레이스 방지
+##### III.i 데이터 레이스 방지
 ~~~rust
 let mut s = String::from("hello");
 {
@@ -634,7 +634,7 @@ let mut s = String::from("hello");
 let rs = &mut s; //OK
 ~~~
 
-##### 3.2 가변 참조자와 불변 참조자 혼용
+##### III.ii 가변 참조자와 불변 참조자 혼용
 ~~~rust
 let mut s = String::from("hello");
 
@@ -644,7 +644,7 @@ let r2 = &mut s; //error
 ~~~
 * 불변 참조자를 가지고 있을 동안에도 가변 참조자를 만들 수 없음
 
-#### 4. 댕글링 참조자(Dangling References)
+#### IV. 댕글링 참조자(Dangling References)
 ~~~rust
 fn main() {
   let reference_to_nothing = dangle(); //error
@@ -672,7 +672,7 @@ fn no_dangle() -> String {
 
 
 ## 4.3. 슬라이스(Slices)
-### 1. 소유권을 갖지 않는 타입
+### I. 소유권을 갖지 않는 타입
 ~~~rust
 fn first_word(s: &String) -> usize {
   let bytes = s.as_bytes();
@@ -714,8 +714,8 @@ s.len()
   * `usize`를 반환하고 있지만 `&String`의 내용물 안에서만 유효
   * `len`이 기존의 `String`으로 부터 분리되어 있기 때문에 나중에도 여전히 유효한지 알 수 없음
 
-### 2. `String`과 `len`분리 시키지 않는 로직
-#### 1. 기존 로직의 문제점
+### II. `String`과 `len`분리 시키지 않는 로직
+#### II.i. 기존 로직의 문제점
 ~~~rust
 fn main() {
   let mut s = String::from("hello world");
@@ -728,8 +728,8 @@ fn main() {
 } //word drop
 ~~~
 
-### 2. 해결방법 : 스트링 슬라이스
-#### 2.1. 스트링 슬라이스(`&str`)
+#### II. 해결방법 : 스트링 슬라이스
+#### II.i. 스트링 슬라이스(`&str`)
 ~~~rust
 let s = String::from("hello world");
 let hello = &s[0..5];
@@ -737,7 +737,7 @@ let world = &s[6..11];
 ~~~
 ![슬라이스](https://rinthel.github.io/rust-lang-book-ko/img/trpl04-06.svg)
 
-#### 2.2. 스트링 슬라이스 반환
+#### II.ii. 스트링 슬라이스 반환
 ~~~rust
 
 fn main() {
@@ -763,8 +763,8 @@ fn first_word(s: &String) -> &str {
 ~~~
 * `clear`함수가 `String`을 잘라낼 때 가변 참조자를 가지지 못해서 생기는 오류 (이미 가변 참조자가 사용되고 있기 때문)
 
-#### 2.3. 스트링 리터럴은 슬라이스이다.
-#### 2.4. 파라미터로서의 스트링 슬라이스
+#### II.iii. 스트링 리터럴은 슬라이스이다.
+#### II.iv. 파라미터로서의 스트링 슬라이스
 ~~~rust
 fn main() {
   let my_string = String::from("hello world");
@@ -794,7 +794,7 @@ fn first_word(s: &str) -> &str { //&String -> &str
 }
 ~~~
 
-#### 2.5. 그 밖의 슬라이스들
+#### II.v. 그 밖의 슬라이스들
 ~~~rust
 let a = [1, 2, 3, 4, 5];
 
@@ -803,9 +803,9 @@ let slice = &a[1..3];
 
 <br>
 
-# 5. 구조체
-## 5.1. 구조체를 정의하고 생성하기
-### 1. 구조체 정의
+## 5. 구조체
+### 5.1. 구조체를 정의하고 생성하기
+#### I. 구조체 정의
 ~~~rust
 struct User {
   username: String,
@@ -816,7 +816,7 @@ struct User {
 ~~~
 * 구조체의 구성요소들은 각각 다른 타입을 가질 수 있음
 
-### 2. 구조체의 인스턴스 생성
+#### II. 구조체의 인스턴스 생성
 ~~~rust
 let user1 = User {
   email: String::from("hypemova@gmail.com"),
@@ -828,7 +828,7 @@ let user1 = User {
 * 프로퍼티 읽기: `.` 사용 ex) `user1.email;`
 * 프로퍼티 변경: `.` 사용 ex) `user1.email = String::from("chtlstjd01@naver.com");`
 
-### 3. 구조체 갱신법(`..`)
+#### III. 구조체 갱신법(`..`)
 ~~~rust
 let user2 = User {
   email: String::from("another@gmail.com"),
@@ -837,7 +837,7 @@ let user2 = User {
 }
 ~~~
 
-### 4. 튜플 구조제
+#### IV. 튜플 구조제
 * 이름이 없고 필드마다 타입이 다름
 ~~~rust
 struct Color(i32, i32, i32);
@@ -847,7 +847,7 @@ let black = Color(0, 0, 0);
 let origin = Point(0, 0, 0);
 ~~~
 
-> ### 구조체 데이터의 소유권
+> #### 구조체 데이터의 소유권
 > * 구조체가 소유권이 없는 데이터의 참조를 저장할 수 있지만 라이프타임의 사용을 전제로함
 > * 라이프타임을 사용하지 않고 저장하면 아래와 같은 일이 발생
 > ~~~rust
@@ -892,7 +892,7 @@ let origin = Point(0, 0, 0);
 * 첫번째 파라미터는 언제나 `self`
   * `self`: 메소드가 호줄되고 있는 구조체의 인스턴스를 가리킴
 
-#### 1. 메소드 정의
+#### I. 메소드 정의
 ~~~rust
 #[derive(Debug)]
 struct Rectangle {
@@ -925,7 +925,7 @@ fn main() {
 >   * `p1.distance(&p2)`와 `(&p).distance(&p2)`는 같은 표현
 >   * 자동 참조 동작은 메소드가 명확한 수신자(`self`)를 가지고 있기 때문임
 
-#### 2. 더 많은 파라미터를 가진 메소드
+#### II. 더 많은 파라미터를 가진 메소드
 ~~~rust
 
 impl Rectangle {
@@ -950,7 +950,7 @@ fn main() {
 }
 ~~~
 
-#### 3. 연관 함수
+#### III. 연관 함수
 * `self`파라미터를 갖지 않는 함수
 * 주로 구조체의 인스턴스를 반환하는 생성자로 사용됨
 
