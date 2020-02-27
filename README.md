@@ -35,6 +35,11 @@
 * [5.1. 구조체를 정의하고 생성하기](#51-구조체를-정의하고-생성하기)
 * [5.2. 구조체를 이용한 예제 프로그램](#52-구조체를-이용한-예제-프로그램)
 * [5.3. 메소드 문법](#53-메소드-문법)
+
+[6. 열거형과 패턴 매칭](#6-열거형과-패턴-매칭)
+* [6.1. 열거형 정의하기](#61-열거형-정의하기)
+* [6.2. match 흐름 제어 연산자](#62-match-흐름-제어-연산자)
+* [6.3. it let을 사용한 간결한 흐름 제어](#63-if-let을-사용한-간결한-흐름-제어)
 # 1. 시작하기
 ## 1.1. 설치하기
 ### Linux와 MacOS에서 Rustup 설치 커맨드 (러스트 안정화 버전)
@@ -964,4 +969,116 @@ impl Rectangle {
 main() {
   let square1 = Rectangle::square(3);
 }
+~~~
+
+<br>
+
+## 6. 열거형과 패턴 매칭
+### 6.1. 열거형 정의하기
+#### I. 정의하기
+~~~rust
+enum IpAddrKind {
+  V4,
+  V6,
+}
+~~~
+#### II. 열거형 값
+~~~rust
+let four = IpAddrKind::A4
+let six = IpAddrKind::A6
+~~~
+#### III. 사용하기
+~~~rust
+enum IpAddrKind {
+  V4,
+  V6,
+}
+
+struct IpAddr {
+  kind: IpAddrKind,
+  address: String,
+}
+
+let home = IpAddr {
+  kind: IpaddrKind::V4,
+  address: String::from("127.0.0.1"),
+};
+
+let loopback = IpAddr {
+  kind: IpAddrKind::V6,
+  address: String::from("::1"),
+}
+~~~
+* `struct`를 사용하여 IP주소와 타입 정의하기
+
+#### 변수에 데이터를 직접 넣기 (1)
+~~~rust
+enum IpAddr {
+  V4(String),
+  V6(String),
+}
+
+let home = IpAddr::V4(String::from("127.0.0.1"));
+
+let loopback = IpAddr::V6(String::from("::1"));
+~~~
+
+#### 열거형 변수에 데이터를 직접 넣기 (2)
+~~~rust
+enum IpAddr {
+  V4(u8, u8, u8, u8),
+  V6(String),
+}
+
+let home = IpAddr::V4(127, 0, 0, 1);
+
+let loopback = IpAddr::V6(String::from("::1"));
+~~~
+
+#### III. 여러 데이터 타입 정의하기
+~~~rust
+enum Message {
+  Quit,
+  Move { x: i32, y: i32 },
+  Write(String),
+  ChangeColor(i32, i32, i32),
+}
+~~~
+
+#### IV. 메소드 정의하기
+~~~rust
+impl Message {
+  fn call(&self) { //self => "hello"
+    //...
+  }
+}
+
+let m = Message::Write(String::from("hello"));
+m.call();
+~~~
+
+#### V. `Option`
+##### V.i. 구조
+~~~rust
+enum Option<T> {
+  Some(T),
+  None,
+}
+~~~
+
+#### V.ii. `Some`과 `None`
+~~~rust
+let some_number = Some(5);
+let some_string = Some("a string");
+
+let absent_number: Option<i32> = None;
+~~~
+
+#### V.iii. 사용법
+~~~rust
+let x: Option<u32> = Some(2);
+assert_eq!(x.contains(&2), true);
+
+let x = x.unwrap(); //2
+// let x = x.unwrap_or(4)
 ~~~
