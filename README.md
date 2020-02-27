@@ -1082,3 +1082,108 @@ assert_eq!(x.contains(&2), true);
 let x = x.unwrap(); //2
 // let x = x.unwrap_or(4)
 ~~~
+
+### 6.2 `match` 흐름 제어 연산자
+#### I. 예제
+* 갈래 사용
+~~~rust
+enum Coin {
+  Penny,
+  Nickel,
+  Dime,
+  Quarter,
+}
+
+fn value_in_cents(coin: Coin) -> u32 {
+  match coin {
+    Coin::Penny => 1,
+    Coin::Nickel => 5,
+    Coin::Dime => 10,
+    Coin::Quarter => 25,
+  }
+}
+~~~
+#### II. 예제2
+* `match` 갈래 안에서 또 갈래를 쓸 수 있음
+~~~rust
+fn value_in_cents(coin: Coin) -> u32 {
+  match coin {
+    Coin::Penny => {
+      println!("Lucky penny!");
+      1
+    },
+    Coin::Nickel => 5,
+    Coin::Dime => 10,
+    Coin::Quarter => 25,
+  }
+}
+~~~
+
+#### III. 값을 바인딩하는 패턴들
+* `Quarter`가 `UsState`의 값을 들고 있음
+~~~rust
+#[derive(Debug)]
+enum UsState {
+  Alabama,
+  Alaska,
+  //...
+}
+
+enum Coin {
+  Penny,
+  Nickel,
+  Dime,
+  Quarter(UsState),
+}
+
+fn value_in_cents(coin: Coin) -> u32 {
+  match coin {
+    Coin::Penny => 1,
+    Coin::Nickel => 5,
+    Coin::Dime => 10,
+    Coin::Quarter(state) => {
+      println!("State quarter from {:?}!", state);
+      25
+    }
+  }
+}
+~~~
+
+#### IV. `Option<T>`를 이용하는 매칭
+~~~rust
+fn plus_one(x: Option<i32>) -> Option<i32> {
+  match x {
+    None => None,
+    Some(i) => Some(i + 1),
+  }
+}
+
+let five = Some(5);
+let six = plus_one(five);
+let none = plus_one(None);
+~~~
+
+#### V. `match` 규칙
+~~~rust
+fn plus_one(x: Option<i32>) -> Option<i32> {
+  match x {
+    Some(i) => Some(i + 1),
+  }
+}
+~~~
+* `match`는 하나도 빠트리면 안됨
+* 위의 예제의 경우 `None`을 다루지 않았기 때문에 컴파일 에러
+
+#### VI. `_`변경자(placeholder)
+* `else`키워드와 같은 개념
+* 나머지 패턴들을 모두 체크
+~~~rust
+let some_u8_value = 0u8;
+match some_u8_value {
+  1 => println!("one"),
+  3 => println!("three"),
+  5 => println!("five"),
+  7 => println!("seven"),
+  _ => (), // (): 아무일도 일어나지 않음
+}
+~~~
