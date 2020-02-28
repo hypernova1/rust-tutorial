@@ -1399,3 +1399,135 @@ note: ... or maybe `use` the module `server` instead of possibly redeclaring it
 ~~~
 
 ### 7.2. `pub`으로 가시성 제어하기
+#### I. 바이너리 크레이트 만들기
+
+Filename: *communicator/src/main.rs*
+~~~rust
+extern crate communicator;
+
+fn main() {
+  communicator::client::connect();
+}
+~~~
+* `extern` 라이브러리 크레이트를 가져오기 위한 명령어
+* *src/main.rs* 파일은 바이너리 크레이트의 루트 파일로 취급 (기존의 라이브러리 크레이트와는 별개)
+* 크레이트의 최상위 모델을 루트 모듈이라 부름
+
+#### 빌드시 나타나는 오류
+~~~
+$ cargo build
+
+error: module `client` is private
+ --> src/main.rs:4:5
+  |
+4 |     communicator::client::connect();
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+~~~
+* `client` 모듈이 비공개라서 접근이 불가능
+
+
+#### II. `pub` 키워드를 사용해서 함수를 공개로 만들기
+Filename: *src/lib.rs*
+~~~rust
+pub mod client;
+
+mod network;
+~~~
+~~~
+$ cargo build
+error: function `connect` is private
+ --> src/main.rs:4:5
+  |
+4 |     communicator::client::connect();
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~
+* `client` 모듈을 공개로 만들었지만 `connect` 함수가 비공개라서 컴파일 실패
+* 수정 코드
+
+Filename: *src/client.rs*
+~~~rust
+pub fn connect() {
+}
+~~~
+
+#### `cargo build`시 생기는 경고
+~~~
+warning: function is never used: `connect`, #[warn(dead_code)] on by default
+ --> src/network/mod.rs:1:1
+  |
+1 | fn connect() {
+  | ^
+
+warning: function is never used: `connect`, #[warn(dead_code)] on by default
+ --> src/network/server.rs:1:1
+  |
+1 | fn connect() {
+  | ^
+~~~
+* 코드가 컴파일 되었지만 비공개 함수들이 내부에서 사용되지 않았기 때문에 경고가 생김
+* `pub`키워드 붙이기  
+
+Filename: *src/network/mod.rs*
+~~~rust
+pub fn connect() {
+}
+
+mod server;
+~~~
+
+~~~
+$ cargo build
+
+warning: function is never used: `connect`, #[warn(dead_code)] on by default
+ --> src/network/mod.rs:1:1
+  |
+1 | pub fn connect() {
+  | ^
+
+warning: function is never used: `connect`, #[warn(dead_code)] on by default
+ --> src/network/server.rs:1:1
+  |
+1 | fn connect() {
+  | ^
+~~~
+* 여전히 경고가 남아있음
+* 함수가 모듈내에서는 공개지만 함수가 상주해있는 `network` 모듈은 공개가 아니기 때문
+
+#### `network` 모듈 공개
+Filename: *src/lib.rs*
+~~~rust
+pub mod client;
+pub mod network;
+~~~
+
+
+#### 비공개 규칙
+1. 어떤 아이템이 공개라면, 부모의 모듈 어디서든지 접근 가능
+2. 어떤 아이템이 비공개라면, 같은 파일 내에 있는 부모 모듈 및 이 부모의 자식 모듈에서만 접근 가능
+
+##### 예제
+Filename: *src/lib.rs*
+~~~rust
+mod outermost {
+  pub fn middle_function() {}
+
+  fn middle_secret_function() {}
+
+  mod inside {
+    pub fn inner_function() {}
+
+    fn secret_function() {}
+  }
+
+  fn try_me() {
+    outermost::middle_function();
+    outermost::middle_secret_function();
+    outermost::inside::inner_function();
+    outermost::inside::secret_function();
+
+  }
+}
+~~~
+* `try_me`함수는 루트 모듈내에 있음
+* 2번째 규칙에 따라 `outermost::middle_function()`는 작동함
+* 나머지는 모두 에러
