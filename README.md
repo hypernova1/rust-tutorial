@@ -40,6 +40,11 @@
 * [6.1. 열거형 정의하기](#61-열거형-정의하기)
 * [6.2. match 흐름 제어 연산자](#62-match-흐름-제어-연산자)
 * [6.3. it let을 사용한 간결한 흐름 제어](#63-if-let을-사용한-간결한-흐름-제어)
+
+[7. 모듈](#7-모듈)
+* [7.1. mod와 파일 시스템](#71-mod와-파일-시스템)
+* [7.2. pub으로 가시성 제어하기](#72-pub으로-가시성-제어하기)
+* [7.3. use로 이름 가져오기](#73-use로-이름-가져오기)
 # 1. 시작하기
 ## 1.1. 설치하기
 ### Linux와 MacOS에서 Rustup 설치 커맨드 (러스트 안정화 버전)
@@ -875,7 +880,7 @@ let origin = Point(0, 0, 0);
 > ~~~
 > ~~~
 > error[E0106]: missing lifetime specifier
-> -->
+>  -->
 >  |
 >2 |     username: &str,
 >  |               ^ expected lifetime parameter
@@ -1023,7 +1028,7 @@ let home = IpAddr::V4(String::from("127.0.0.1"));
 let loopback = IpAddr::V6(String::from("::1"));
 ~~~
 
-#### 열거형 변수에 데이터를 직접 넣기 (2)
+#### 변수에 데이터를 직접 넣기 (2)
 ~~~rust
 enum IpAddr {
   V4(u8, u8, u8, u8),
@@ -1187,3 +1192,210 @@ match some_u8_value {
   _ => (), // (): 아무일도 일어나지 않음
 }
 ~~~
+
+### 6.3 `if let`을 사용한 간결한 흐름 제어
+#### I. `if let`
+* 기존 코드
+~~~rust
+let some_u8_value = Some(0u8);
+match some_u8_value {
+  Some(3) => println!("three),
+  _ => (),
+}
+~~~
+* `if let` 사용
+~~~rust
+if let Some(3) = some_u8_value {
+  println!("three");
+}
+~~~
+
+#### II. `if let`과 `else`
+* 기존 코드
+~~~rust
+let mut count = 0;
+match coin {
+  Coin::Quarter(state) => println!("State quarter from {:?}", state),
+  _ => count += 1,
+}
+~~~
+* `if let` `else`를 사용
+~~~rust
+let mut count = 0;
+if let Coin::Quarter(state) = coin {
+  println!("State quarter from {:?}", state);
+} else {
+  count += 1;
+}
+~~~
+
+<br>
+
+## 7. 모듈
+### 7.1. `mod`와 파일 시스템
+#### I. 라이브러리 크레이트 만들기
+~~~
+$ cargo new communicator --lib
+$ cd communicator
+~~~
+
+#### II. 내부 코드
+Filename: *src/lib.rs*
+~~~rust
+#[cfg(test)]
+mod tests {
+  #[test]
+  fn it_works() {
+  }
+}
+~~~
+* main.rs 파일이 없기 때문에 `cargo run`로 실행할 것이 없음
+* `cargo build`를 사용
+
+
+#### III. 모듈 정의
+Filename: *src/lib.rs*
+~~~rust
+mod network {
+  fn connect() {
+  }
+}
+~~~
+* `connect`에 접근하려면 `::`문법을 사용해야함
+  * ex) `network::connect()`
+
+~~~rust
+mod network {
+  fn connect() {
+  }
+}
+
+mod client {
+  fn connect() {
+  }
+}
+~~~
+
+#### IV. 모듈 내부에 모듈 정의
+~~~rust
+mod network {
+  fn connect() {
+  }
+
+  mod client {
+    fn connect() {
+    }
+  }
+}
+~~~
+
+##### V. 모듈을 다른 파일로 옮기가
+* IV의 에제는 시스템이 복잡해질수록 유지보수하기가 힘들기 때문에 따로 폴더 구조를 만듬  
+
+##### 폴더 구조
+~~~
+communicator
+ ├── client
+ └── network
+     └── server
+~~~
+
+Filename: *src/lib.rs*
+~~~rust
+mod client; // src/client.rs 에서 구현
+
+mod network {
+  fn connect() {
+  }
+
+  mod server {
+    fn connect() {
+    }
+  }
+}
+~~~
+
+Filename: *src/client.rs*
+~~~rust
+fn connect() {
+}
+~~~
+* src/lib.rs에 `client` 모듈을 미리 선언했기 때문에 `mod`선언이 필요 없음
+
+#### VI. `network` 모듈 개별 파일로 추출하기
+
+Filename: *src/lib.rs*
+~~~rust
+mod client;
+
+mod network;
+~~~
+Filename: *src/network.rs*
+~~~rust
+fn connect() {
+}
+
+mod server {
+  fn connect() {
+  }
+}
+~~~
+
+#### VII. `server` 모듈 추출하기
+Filename: *src/network.rs*
+~~~rust
+fn connect() {
+}
+mod server;
+~~~
+
+Filename: *src/server.rs*
+~~~rust
+fn connect() {
+}
+~~~
+~~~
+$ cargo build
+   Compiling communicator v0.1.0 (file:///projects/communicator)
+error: cannot declare a new module at this location
+ --> src/network.rs:4:5
+  |
+4 | mod server;
+  |     ^^^^^^
+  |
+note: maybe move this module `network` to its own directory via `network/mod.rs`
+ --> src/network.rs:4:5
+  |
+4 | mod server;
+  |     ^^^^^^
+note: ... or maybe `use` the module `server` instead of possibly redeclaring it
+ --> src/network.rs:4:5
+  |
+4 | mod server;
+  |     ^^^
+~~~
+* `cargo build` 실행시 에러 발생: `server`서브 모듈을 *src/server.rs* 로 추출을 시도했을 때 발생하는 에러
+
+#### VIII. 에러 해결
+1. network 디렉토리를 생성해서 그 안에 *src/network* 파일 옮기기
+2. *src/network/mod.rs* 생성
+##### 폴더구조
+~~~
+├── src
+│   ├── client.rs
+│   ├── lib.rs
+│   └── network
+│       ├── mod.rs
+│       └── server.rs
+~~~
+
+#### 모듈 파일 시스템의 규칙
+* `foo`라는 이름의 서브 모듈을 가지고 있다면 *foo.rs*라는 이름의 파일 내에 `foo`에 대한 선언이 있어야함
+* `foo`가 서브모듈을 가지고 있다면 *foo/mod.rs*라는 이름의 파일에 `foo`에 대한 선언이 있어야함
+~~~
+├── foo
+│   ├── bar.rs (contains the declarations in `foo::bar`)
+│   └── mod.rs (contains the declarations in `foo`, including `mod bar`)
+~~~
+
+### 7.2. `pub`으로 가시성 제어하기
