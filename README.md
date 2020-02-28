@@ -1529,5 +1529,131 @@ mod outermost {
 }
 ~~~
 * `try_me`함수는 루트 모듈내에 있음
-* 2번째 규칙에 따라 `outermost::middle_function()`는 작동함
-* 나머지는 모두 에러
+  * `outermost::middle_function()`: 2번째 규칙에 따라 작동
+  * `outermost::middle_secret_function()`: 두번째 규칙으로 인해 컴파일 에러
+  * `inside`: 비공개이고 자식 모듈이 없으므로 현재 모듈인 `outermost`에 의해서만 접근 가능 => 컴파일 에러
+
+### 7.3. use로 이름 가져오기
+#### use를 사용하지 않았을 때
+~~~rust
+pub mod a {
+  pub mod series {
+    pub mod of {
+      pub fn nested_modules() {}
+    }
+  }
+}
+
+fn main() {
+  a::series::of::nested_modules();
+}
+~~~
+* `of`모듈 내의 함수를 여러번 호출하려면 항상 긴 코드를 작성해야 함
+
+### I. `use` 사용하기
+~~~rust
+
+use a::series::of;
+
+fn main() {
+  of::nested_modules();
+}
+~~~
+
+~~~rust
+use a::series::of::nested_modules;
+
+fn main() {
+  nested_modules();
+}
+~~~
+* 모듈 내의 함수를 가져오는 것도 가능
+
+#### 열거형 가져오기
+~~~rust
+enum TrafficLight {
+  Red,
+  Yellow,
+  Green,
+}
+
+use TrafficLight::{Red, Yellow};
+
+fn main() {
+  let red = Red;
+  let yellow = Yellow;
+  let greed = TrafficLight::Green;
+}
+~~~
+
+#### `*`을 이용한 모두(glob) 가져오기
+~~~rust
+use TrafficLight::*;
+
+fn main() {
+  let red = Red;
+  let yellow = Yellow;
+  let greed = Green;
+}
+~~~
+
+### II. `super`를 사용하여 부모 모듈에 접근하기
+* 라이브러리 크레이트를 생성하면 `tests` 모듈이 생성되어 있음  
+
+Filename: *src/lib.rs*
+~~~rust
+pub mod client;
+
+pub mod network;
+
+#[cfg(test)]
+mod tests {
+  #[test]
+  fn it_works() {
+  }
+}
+~~~
+
+#### 모듈의 계층 구조
+~~~
+communicator
+ ├── client
+ ├── network
+ |   └── client
+ └── tests
+~~~
+
+#### `tests`의 `it_works`함수에서 `client::connect` 호출하기
+Filename: *src/lib.rs*
+~~~rust
+#[cfg(test)]
+mod tests {
+  #[test]
+  fn it_works() {
+    client::connect();
+  }
+}
+~~~
+
+~~~
+$ cargo test
+   Compiling communicator v0.1.0 (file:///projects/communicator)
+error[E0433]: failed to resolve. Use of undeclared type or module `client`
+ --> src/lib.rs:9:9
+  |
+9 |         client::connect();
+  |         ^^^^^^^^^^^^^^^ Use of undeclared type or module `client`
+~~~
+* `tests` 모듈은 예외적으로 이 스코프 내에서 `client` 모듈이 필요함
+* 해결방법: `tests` 모듈 내에 `super` 선언하여 가져오기
+~~~rust
+#[cfg(test)]
+mod tests {
+  use super::client;
+
+  #[test]
+  fn it_works() {
+    client::connect();
+  }
+}
+~~~
