@@ -1784,3 +1784,41 @@ let row = vec![
   SpreadsheetCell::String(String::from("blue")),
 ];
 ~~~
+
+### 8.2. 스트링
+* 스트링 슬라이스(`str`)와 다르게 `String`타입은 표준 라이브러리를 통해 제공됨
+* UTF-8 인코딩
+
+#### I. 생성하기
+~~~rust
+let mut s = String::new();
+
+let data = "initial contents";
+let s = data.to_string(); //String::from("initial contents")와 같음
+
+let s = "initial contents".to_string();
+~~~
+
+#### II. 갱신하기
+##### II.i `push_str`, `push`
+~~~rust
+let mut s = String::from("foo");
+s.push_str("bar");
+
+let mut s1 = String::from("foo");
+let s2 = "bar";
+s1.push_str(&s2);
+
+println!("{}", s2); //bar
+
+
+let mut s = String::from("lo");
+s.push('l');
+~~~
+
+##### II.ii `+`연산자나 `format!`매크로를 이용한 접합
+~~~rust
+let s1 = String::from("Hello, ");
+let s2 = String::from("world!");
+let s3 = s1 + &s2; //여기서 s1은 이동되어 더 이상 사용 불가
+~~~
