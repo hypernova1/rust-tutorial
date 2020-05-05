@@ -11,7 +11,7 @@
 <br>  
 <br>    
   
-## 목차  
+## 정리된 목차들  
 [1. 시작하기](#1-시작하기)    
 * [1.1. 설치하기](#11-설치하기)    
 * [1.2. Hello, World!](#12-hello-world)  
@@ -45,7 +45,22 @@
 * [7.1. mod와 파일 시스템](#71-mod와-파일-시스템)
 * [7.2. pub으로 가시성 제어하기](#72-pub으로-가시성-제어하기)
 * [7.3. use로 이름 가져오기](#73-use로-이름-가져오기)
+
+[8. 컬렉션(Collections)](#8-컬렉션Collections)
+* [8.1. 벡터](#81-벡터)
+* [8.2. 스트링](#82-스트링)
+* [8.3. 해쉬맵](#83-해쉬맵)
+
+
+<br>
+
+<br>
+
+<br>
+
+
 # 1. 시작하기
+
 ## 1.1. 설치하기
 ### Linux와 MacOS에서 Rustup 설치 커맨드 (러스트 안정화 버전)
 ~~~
@@ -1656,4 +1671,154 @@ mod tests {
     client::connect();
   }
 }
+~~~
+
+## 8. 컬렉션(Collections)
+### 8.1. 벡터(`Vec<T>`)
+* 메모리 상에서 서로 이웃하도록 모든 값을 집어 넣는 단일 데이터 구조 안에서 하나 이상의 값을 저장
+* 같은 타입만 저장 가능
+
+### I. 생성하기
+#### I.i. `Vec::new` 함수 호출
+~~~rust
+let v: Vec<i32> = Vec::new();
+~~~
+#### I.ii. `vec!`매크로 사용
+~~~rust
+let v = vec![1, 2, 3];
+~~~
+
+### II. 갱신하기
+~~~rust
+let mut v = Vec::new();
+v.puch(5);
+v.puch(6);
+v.puch(7);
+v.puch(8);
+~~~
+
+### III. 드롭
+* 모든 요소가 드롭이 됨
+~~~rust
+{
+  let v = vec![1, 2, 3, 4];
+} //v가 스코프 밖으로 벗어났으므로 모든 데이터 해제
+~~~
+
+### IV. 요소 읽기
+~~~rust
+let v = vec![1, 2, 3, 4, 5];
+
+let third: &i32 = &v[2];
+let third: Option<&i32> = v.get(2);
+~~~
+
+#### 길이를 벗어난 데이터에 접근하려고 할 때
+~~~rust
+let v = vec![1, 2, 3, 4, 5];
+
+let does_not_exist = &v[100];
+let does_not_exist = v.get(100);
+~~~
+* 첫번째 `deos_not_exist`는 `panic!`을 일으킴
+  * 존재하지 않는 요소를 참조하기 때문
+* 첫번째 `deos_not_exist`는 패닉 없이 `None`이 반환 됨
+
+
+#### 유효하지 않은 참조자
+~~~rust
+let mut v = vec![1, 2, 3, 4, 5];
+
+let first = &v[0];
+
+v.push(6);
+~~~
+* 아이템에 대한 참조자를 가지는 동안 벡터에 요소 추가 시도
+* 아래와 같은 에러 발생
+
+~~~
+error[E0502]: cannot borrow `v` as mutable because it is also borrowed as
+immutable
+  |
+4 | let first = &v[0];
+  |              - immutable borrow occurs here
+5 |
+6 | v.push(6);
+  | ^ mutable borrow occurs here
+7 | }
+  | - immutable borrow ends here
+~~~
+* 새로운 요소를 끝에 추가하면 새로 메모리를 할당 받기 때문에 예전 요소들을 새 공간에 복사하는 일이 필요할 수도 있는데 이는 벡터가 도든 요소들을 붙여서 저장할 공간이 충분치 않은 환경에서 일어날 수 있음 이러한 경우에 첫번째 요소할당(`let first = &v[0]`)이 해제된 메모리를 가르킬 수 있음
+* 빌림 규칙은 이러한 상황에 빠지지 않도록 함
+
+
+### V. 반복처리
+#### V.i. `for`루프를 이용한 반복
+~~~rust
+let v = vec![100, 32, 57];
+for i in & v {
+  println!("{}", i);
+}
+~~~
+
+#### V.ii. 가변 참조자를 사용하여 요소 변경하기
+~~~rust
+let mut v = vec![100, 32, 57];
+for i in &mut v {
+  *i += 50;
+}
+~~~
+* `*`(역참조 연산자)를 이용하여 값을 얻어야함
+
+### 열거형을 사용하여 여러타입 저장
+~~~rust
+enum SpreadsheetCell {
+  Int(i32),
+  Float(f64),
+  Text(String).
+}
+
+let row = vec![
+  SpreadsheetCell::Int(3),
+  SpreadsheetCell::Float(2.3),
+  SpreadsheetCell::String(String::from("blue")),
+];
+~~~
+
+### 8.2. 스트링
+* 스트링 슬라이스(`str`)와 다르게 `String`타입은 표준 라이브러리를 통해 제공됨
+* UTF-8 인코딩
+
+#### I. 생성하기
+~~~rust
+let mut s = String::new();
+
+let data = "initial contents";
+let s = data.to_string(); //String::from("initial contents")와 같음
+
+let s = "initial contents".to_string();
+~~~
+
+#### II. 갱신하기
+##### II.i `push_str`, `push`
+~~~rust
+let mut s = String::from("foo");
+s.push_str("bar");
+
+let mut s1 = String::from("foo");
+let s2 = "bar";
+s1.push_str(&s2);
+
+println!("{}", s2); //bar
+
+
+let mut s = String::from("lo");
+s.push('l');
+~~~
+
+##### II.ii `+`연산자나 `format!`매크로를 이용한 접합
+~~~rust
+let s1 = String::from("Hello, ");
+let s2 = String::from("world!");
+let s3 = s1 + &s2; //여기서 s1은 이동되어 더 이상 사용 불가
 ~~~
