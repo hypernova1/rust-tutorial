@@ -2,8 +2,7 @@ extern crate greprs;
 
 use std::env;
 use std::process;
-
-use greprs::{Config, run};
+use greprs::*;
 
 fn main() {
 
