@@ -1,16 +1,17 @@
 
 # Rust Tutorial
-  
+
 ## 목적  
 - Rust 언어 학습  
   
 ## 계획  
 - https://rinthel.github.io/rust-lang-book-ko 사이트 학습    
   
+
 <br>  
 <br>  
 <br>    
-  
+
 ## 목차  
 [1. 시작하기](#1-시작하기)    
 * [1.1. 설치하기](#11-설치하기)    
@@ -18,7 +19,7 @@
 * [1.3. Hello, Cargo!](#13-hello-cargo)  
 
 [2. 추리게임 튜토리얼](#2-추리게임-튜토리얼)  
-  
+
 [3. 보편적인 프로그래밍 개념](#3-보편적인-프로그래밍-개념)
 * [3.1. 변수와 가변성](#31-변수와-가변성)
 * [3.2. 데이터 타입들](#32-데이터-타입들)
@@ -88,7 +89,7 @@ rustc --version
 ~~~
 rustup doc
 ~~~
-  
+
 <br>
 
 ## 1.2. Hello, World!
@@ -247,7 +248,7 @@ let guess: u32 = "32".parse().expect("Not a number!");
 | Hex | `0xff` |
 | Octal | `0o77` |
 | Binary | `0b1111_0000` |
-| Byte (`u8` only) | `b'A'` | 
+| Byte (`u8` only) | `b'A'` |
 
 #### II.iii. 부동 소수점 타입
 * 소수점을 갖는 타입
@@ -263,7 +264,7 @@ let y: f32 = 3.0    // f32
 ~~~rust
 let t = true;
 let f: bool = false;
-~~~ 
+~~~
 
 #### II.v. 문자타입
 * char 타입
@@ -533,7 +534,7 @@ let y = x;
 
 println!("{}-{}", x, y); //OK
 ~~~
-    
+
 #### X. 소유권과 함수
 ~~~rust
 fn main() {
@@ -1822,3 +1823,99 @@ let s1 = String::from("Hello, ");
 let s2 = String::from("world!");
 let s3 = s1 + &s2; //여기서 s1은 이동되어 더 이상 사용 불가
 ~~~
+
+* `add` 메소드 시그니처
+
+~~~rust
+fn add(self, s: &str) -> String { // self의 소유권을 가져가기 때문에 메소드 종료시 drop 됨
+~~~
+
+~~~rust
+let s1 = String::from("tic");
+let s2 = String::from("tac");
+let s3 = String::from("toe");
+
+let s = s1 + "=" + &s2 + "-" + &s3 //일반 스트링 연산
+let s = format!("{}-{}-{}", s1, s2, s3); //매크로를 사용한 연산: 소유권을 가져가지 않음
+~~~
+
+##### II.iii 스트링 내부의 인덱싱
+
+* 러스트는 `String` 의 인덱싱을 지원하지 않는다.
+
+~~~rust
+let s1 = String::from("hello");
+let h = s1[0]; //error
+~~~
+
+* 내부적 표현
+  * `String`은 `Vec<u8>`을 감싼 것(wrapper)
+
+~~~rust
+let len = String::from("Hela").len();
+~~~
+
+* `Vec`이 4바이트 길이라 `len`의 값은 4
+
+~~~rust
+let len = String::from("Здравствуйте").len();
+let len = "Здравствуйте"; 
+
+let answer = &hello[0];
+~~~
+
+* UTF-8로 인코딩되었기 때문에 `len`은 24바이트
+* `3` 의 첫 번째 바이트는 208이고 두 번째 바이트트 151이라 208이 반환될 거 같지만 그 자체로 유효한 문자가 아니기 때문에 러스트는 컴파일 패닉를 발생시킴
+
+
+
+### III. 스트링 슬라이싱
+
+~~~rust
+let hello = "Здравствуйте";
+
+let s = &hello[0..4];
+~~~
+
+* `s` 는 4바이트를 가진 `&str`이고 값은 `Зд`
+* 만약 `&hello[0..1]`을 호출한다면 런타임 패닉을 발생시킴
+
+### IV. 스트링 내에서 반복적으로 실행되는 메소드
+
+1. `char`
+
+~~~rust
+for c in "नमस्ते".chars() {
+    println!("{}", c);
+}
+~~~
+
+* 결과값
+
+~~~rust
+न
+म
+स
+्
+त
+े
+~~~
+
+2. `bytes`
+
+~~~rust
+for b in "नमस्ते".bytes() {
+    println!("{}", b);
+}
+~~~
+
+* 결과값
+
+~~~
+224
+164
+168
+224
+// ... etc
+~~~
+
