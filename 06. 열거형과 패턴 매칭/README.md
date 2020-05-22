@@ -12,6 +12,37 @@ enum IpAddrKind {
   V6,
 }
 ~~~
+
+
+#### 타입 별칭
+* `enum`의 이름이 너무 길면 별칭을 통해 줄일 수 있음
+~~~rust
+enum VeryVerboseEnumOfThingsToDoWithNumbers {
+  Add,
+  Substract,
+}
+
+// 타입 별칭 생성
+type Operations = VeryVerboseEnumOfThingsToDoWithNumbers;
+
+fn main() {
+  let x = Operations::Add;
+}
+~~~
+
+#### Self 별칭
+* 위와 마찬가지로 이름이 너무 길면 내부 함수에서 Self로 바꿔 사용 가능
+~~~rust
+impl VeryVerboseEnumOfThingsToDoWithNumbers {
+  fn run(&self, x: i32) -> i32 {
+    match self {
+      Self::Add => x + y,
+      Self::Substract => x - y,
+    }
+  }
+}
+~~~
+
 ### II. 열거형 값
 ~~~rust
 let four = IpAddrKind::A4
@@ -85,6 +116,15 @@ impl Message {
 
 let m = Message::Write(String::from("hello"));
 m.call();
+~~~
+
+#### C-like 열거형
+~~~rust
+enum Color {
+  Red = 0xff0000,
+  Green = 0x00ff00,
+  Blue = 0x0000ff,
+}
 ~~~
 
 ### V. `Option`

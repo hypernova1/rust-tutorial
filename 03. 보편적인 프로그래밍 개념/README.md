@@ -8,7 +8,7 @@
 
 ## 1. 변수와 가변성
 ### I. 기본 변수(let, const)는 불변성 (*immutable*)
-~~~
+~~~rust
 let x = 0;
 x = 1 //컴파일 에러
 ~~~
@@ -28,8 +28,30 @@ x = 1; //OK
 const MAX_POINTS: u32 = 100_000;
 ~~~
 
-### IV. Shadowing
+#### static 상수
+* `'static` 라이프 타임을 가지며 변경 가능
+* 정적 수명은 유추되므로 지정할 필요 없음
+~~~rust
+static LANGUAGE: &str = "Rust";
+const THRESHOLD: i32 = 10;
+
+fn is_big(n: i32) -> bool {
+    n > THRESHOLD
+}
+
+fn main() {
+    let n = 16;
+
+    println!("This is {}", LANGUAGE);
+    println!("The threshold is {}", THRESHOLD);
+    println!("{} is {}", n if is_big(n) { "big" } else { "small" });
+
+    THRESHOLD = 5; //error
+}
 ~~~
+
+### IV. Shadowing
+~~~rust
 let x = 5;
 let x = x + 1;
 let x = x * 2;
@@ -38,7 +60,8 @@ println!("{}", x); // 12
 * `mut` 키워드와의 차이점
     * 변경 후에는 불변성 유지
     * 타입 변경 가능 (불필요한 변수 선언 방지)
-~~~
+
+~~~rust
 let spaces = "   ";
 let spaces = spaces.len(); // OK
 
@@ -49,8 +72,10 @@ spaces = spaces.len(); // 컴파일 에러
 
 ## 2. 데이터 타입들
 ### I. 데이터 타입 명시
-~~~
-let guess: u32 = "32".parse().expect("Not a number!");
+~~~rust
+let guess: u32 = "32".parse().expect("Not a number!"); //일반 명시
+
+let an_integer = 3i32 // 접미사 명시
 ~~~
 ### **II. 스칼라 타입들**
 * 스칼라: 하나의 값으로 표현되는 타입
@@ -129,7 +154,31 @@ let a = [1, 2, 3, 4, 5];
 let first = a[0]; //첫번째 요소 접근
 ~~~
 * 배열의 길이를 초과하는 요소에 접근하면 에러 발생 (rust에서는 panic 하다라고 표현하는 듯)
-<br>
+
+### IV. Aliasing
+* 기본 타입 명칭을 커스텀할 수 있음
+* UpperCamelCase로 작성해야함
+* 주 용도는 상용구를 줄이는 것
+  * 사용예: `IoResult<T>`는 `Result<T>`의 볉칭
+~~~rust
+type NanoSecond = u64;
+type Inch = u64;
+
+//UpperCamelCase를 사용하지 않을시 나오는 경고 숨기기
+#[allow(non_camel_case_type)]
+type u64_t = u64;
+
+fn main() {
+    // NanoSecond = Inch = u64_t = u64
+    let nanoseconds: NanoSecond = 5 as u64_t;
+    let inches: Inch = 2 as u64_t;
+
+    // 별칭은 새로운 타입이 아니기 때문에 추가적인 타입 안전을 제공하지 않음
+    println!("{} nanoseconds + {} inches = {} unit?",
+        nanoseconds, inches, nanoseconds + inches);
+}
+~~~
+
 
 ## 3. 함수 동작 원리
 ### I. 함수 선언하기
@@ -248,6 +297,48 @@ loop {
 }
 ~~~
 * 프로그램을 강제 종료하기 전까지 again 반복
+
+
+#### 중첩 및 라벨
+* 중첩 루프를 다룰 때 라벨을 사용하여 특정 외부 루프로 이동할 수 있음
+~~~rust
+#![allow(unreachable_code)]
+
+fn main() {
+    'outer: loop {
+        println!("Entered the inner loop");
+
+        'inner: loop {
+            println!("Entered the inner loop");
+
+            break 'outer;
+        }
+
+        println!("this point will never be reached");
+    }
+
+    println!("Exited the outer loop")
+}
+~~~
+
+#### 루프에서 복귀
+* break 다음에 값을 줘서 변수에 대입
+~~~rust
+fn main() {
+    let mut counter = 0;
+
+    let result = loop {
+        counter += 1;
+
+        if counter == 10 {
+            break counter * 2
+        }
+    }
+
+    assert_eq!(result, 20);
+}
+~~~
+
 #### IV.ii `while`
 ~~~rust
 let mut number = 3;
@@ -271,3 +362,4 @@ for number in (1..4).rev() { //(1..4) => Range: 한 숫자에서 다른 숫자�
     println!("{}", number);
 }
 ~~~
+
