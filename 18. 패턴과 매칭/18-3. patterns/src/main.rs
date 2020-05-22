@@ -329,4 +329,5 @@ fn main() {
     ref_and_ref_mut();
     match_guard();
     match_guard2();
+    at();
 }
