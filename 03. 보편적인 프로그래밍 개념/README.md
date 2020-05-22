@@ -299,45 +299,7 @@ loop {
 * 프로그램을 강제 종료하기 전까지 again 반복
 
 
-#### 중첩 및 라벨
-* 중첩 루프를 다룰 때 라벨을 사용하여 특정 외부 루프로 이동할 수 있음
-~~~rust
-#![allow(unreachable_code)]
 
-fn main() {
-    'outer: loop {
-        println!("Entered the inner loop");
-
-        'inner: loop {
-            println!("Entered the inner loop");
-
-            break 'outer;
-        }
-
-        println!("this point will never be reached");
-    }
-
-    println!("Exited the outer loop")
-}
-~~~
-
-#### 루프에서 복귀
-* break 다음에 값을 줘서 변수에 대입
-~~~rust
-fn main() {
-    let mut counter = 0;
-
-    let result = loop {
-        counter += 1;
-
-        if counter == 10 {
-            break counter * 2
-        }
-    }
-
-    assert_eq!(result, 20);
-}
-~~~
 
 #### IV.ii `while`
 ~~~rust
