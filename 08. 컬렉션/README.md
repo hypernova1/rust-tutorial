@@ -1,8 +1,8 @@
 # 컬렉션(Collections)
 
-[1. 벡터](#1-벡터VecT)
-[2. 스트링](#2-스트링)
-[3. 해쉬맵](#3-해쉬맵)
+[1. 벡터](#1-벡터VecT)  
+[2. 스트링](#2-스트링)  
+[3. 해쉬맵](#3-해쉬맵)  
 
 ## 1. 벡터(`Vec<T>`)
 * 메모리 상에서 서로 이웃하도록 모든 값을 집어 넣는 단일 데이터 구조 안에서 하나 이상의 값을 저장
@@ -246,4 +246,129 @@ for b in "नमस्ते".bytes() {
 168
 224
 // ... etc
+~~~
+
+## 3. 해쉬맵
+* `HashMap<K, V>`
+* K타입의 키에 V타입의 값을 매핑
+* 해쉬 함수를 통해 키와 값을 어떤 메모리에 저장할지 결정
+* 서비스 거부 공격(Denial of Service(DoS) attack)에 저항 기능을 제공할 수 있는 암호학적으로 보안되는 해쉬 함수를 사용
+* 다른 해쉬어를 특정하여 다른 함수로 변경 가능
+  * 해쉬어: `BuildHasher`를 구현한 타입
+
+### I. 생성하기
+~~~rust
+use std::collections::HashMap;
+
+fn main() {
+  let mut score = HashMap::new(); //해쉬맵  생성
+
+  score.insert(String::from("Blue"), 10); //요소 추가
+  score.insert(String::from("Red"), 50);
+}
+~~~
+
+### 팀의 리스트와 점수로 해쉬맵 생성
+~~~rust
+use std::collections::HashMap;
+
+fn main() {
+  let teams = vecQ![String::from("Blue"), String::from("Red")];
+  let intial_scores = vec![10, 50];
+
+  let scores: HashMap<_, _> = teams.iter().zip(initial_scores.iter()).collec(); //_를 사용하여 타입 추론
+}
+~~~
+
+## II. 해쉬맵과 소유권
+* `i32`와 같이 Copy 트레잇이 구현된 타입은 값이 복사되지만 `String`같이 소유된 값들은 소유권이 이동됨
+~~~rust
+use std::collections::HashMap;
+
+fn main() {
+  let field_name = String::from("Favorite color");
+  let field_value = String::from("Blue");
+
+  let mut map = HashMap::new();
+  map.insert(field_name, field_value);
+} //filed_name과 field_value는 더이상 사용 불가
+~~~
+
+## III. 해쉬맵 내의 값 접근하기
+~~~rust
+use std::collections::HashMap;
+
+fn main() {
+  let mut scores = HashMap::new();
+
+  scores.insert(String::from("Blue"), 10);
+  scores.insert(String::from("Yellow"), 50);
+
+  let team_name = String::from("Blue");
+  let score = scores.get(&team_name); //Option<V>를 반환
+}
+~~~
+
+### for 루프 사용
+~~~rust
+use std::collections::HashMap;
+
+fn main() {
+  let mut scores = HashMap::new();
+
+  scores.insert(String::from("Blue"), 10);
+  scores.insert(String::from("Yellow"), 50);
+
+  for (key, value) in &scores {
+    println!("{}: {}", key, value);
+  }
+}
+~~~
+
+## IV. 해쉬맵 갱신하기
+### IV.i. 값 덮어쓰기
+~~~rust
+use std::collections::HashMap;
+
+fn main() {
+  let mut scores = HashMap::new();
+
+  scores.insert(String::from("Blue"), 10);
+  scores.insert(String::from("Blue"), 25); //같은 키로 넣으면 덮어씌워짐
+
+  println!("{:?}", scores);
+}
+~~~
+
+### IV.ii. 키에 할당된 값이 없을 때만 삽입하기
+~~~rust
+use std::collections::HashMap;
+
+fn main() {
+  let mut scores = HashMap::new();
+  scores.insert(String::from("Blue"), 10);
+
+  scores.entry(String::from("Yellow")).or_insert(50);
+  scores.entry(String::from("Blue")).or_insert(50);
+
+  println!("{:?}", scores);
+}
+~~~
+
+### IV.iii. 예전 값을 기초로 값 갱신하기
+~~~rust
+use std::collections::HashMap;
+
+fn main() {
+  let text = "hello world wonderful world";
+
+  let mut map = HashMap::new();
+
+  for word in text.split_whitespace() {
+    let count = map.entry(word).or_insert(0); //or_insert: 가변 참조자(&mut V)를 반환
+    *count += 1; //역참조를 사용하여 값 변경
+  }
+}
+
+println!("{:?}", map);
 ~~~
