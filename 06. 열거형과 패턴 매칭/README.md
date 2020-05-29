@@ -5,7 +5,9 @@
 [3. it let을 사용한 간결한 흐름 제어](#3-if-let을-사용한-간결한-흐름-제어)  
 
 ## 1. 열거형 정의하기
+
 ### I. 정의하기
+
 ~~~rust
 enum IpAddrKind {
   V4,
@@ -13,9 +15,10 @@ enum IpAddrKind {
 }
 ~~~
 
-
 #### 타입 별칭
+
 * `enum`의 이름이 너무 길면 별칭을 통해 줄일 수 있음
+
 ~~~rust
 enum VeryVerboseEnumOfThingsToDoWithNumbers {
   Add,
@@ -31,7 +34,9 @@ fn main() {
 ~~~
 
 #### Self 별칭
+
 * 위와 마찬가지로 이름이 너무 길면 내부 함수에서 Self로 바꿔 사용 가능
+
 ~~~rust
 impl VeryVerboseEnumOfThingsToDoWithNumbers {
   fn run(&self, x: i32) -> i32 {
@@ -44,11 +49,14 @@ impl VeryVerboseEnumOfThingsToDoWithNumbers {
 ~~~
 
 ### II. 열거형 값
+
 ~~~rust
 let four = IpAddrKind::A4
 let six = IpAddrKind::A6
 ~~~
+
 ### III. 사용하기
+
 ~~~rust
 enum IpAddrKind {
   V4,
@@ -70,9 +78,11 @@ let loopback = IpAddr {
   address: String::from("::1"),
 }
 ~~~
+
 * `struct`를 사용하여 IP주소와 타입 정의하기
 
 #### 변수에 데이터를 직접 넣기 (1)
+
 ~~~rust
 enum IpAddr {
   V4(String),
@@ -85,6 +95,7 @@ let loopback = IpAddr::V6(String::from("::1"));
 ~~~
 
 #### 변수에 데이터를 직접 넣기 (2)
+
 ~~~rust
 enum IpAddr {
   V4(u8, u8, u8, u8),
@@ -97,6 +108,7 @@ let loopback = IpAddr::V6(String::from("::1"));
 ~~~
 
 ### III. 여러 데이터 타입 정의하기
+
 ~~~rust
 enum Message {
   Quit,
@@ -107,6 +119,7 @@ enum Message {
 ~~~
 
 ### IV. 메소드 정의하기
+
 ~~~rust
 impl Message {
   fn call(&self) { //self => "hello"
@@ -119,6 +132,7 @@ m.call();
 ~~~
 
 #### C-like 열거형
+
 ~~~rust
 enum Color {
   Red = 0xff0000,
@@ -128,7 +142,9 @@ enum Color {
 ~~~
 
 ### V. `Option`
-#### V.i. 구조
+
+#### 구조
+
 ~~~rust
 enum Option<T> {
   Some(T),
@@ -136,7 +152,8 @@ enum Option<T> {
 }
 ~~~
 
-#### V.ii. `Some`과 `None`
+#### `Some`과 `None`
+
 ~~~rust
 let some_number = Some(5);
 let some_string = Some("a string");
@@ -144,7 +161,8 @@ let some_string = Some("a string");
 let absent_number: Option<i32> = None;
 ~~~
 
-#### V.iii. 사용법
+#### 사용법
+
 ~~~rust
 let x: Option<u32> = Some(2);
 assert_eq!(x.contains(&2), true);
@@ -154,8 +172,11 @@ let x = x.unwrap(); //2
 ~~~
 
 ## 2. `match` 흐름 제어 연산자
+
 ### I. 예제
+
 * 갈래 사용
+
 ~~~rust
 enum Coin {
   Penny,
@@ -173,8 +194,11 @@ fn value_in_cents(coin: Coin) -> u32 {
   }
 }
 ~~~
+
 ### II. 예제2
+
 * `match` 갈래 안에서 또 갈래를 쓸 수 있음
+
 ~~~rust
 fn value_in_cents(coin: Coin) -> u32 {
   match coin {
@@ -190,7 +214,9 @@ fn value_in_cents(coin: Coin) -> u32 {
 ~~~
 
 ### III. 값을 바인딩하는 패턴들
+
 * `Quarter`가 `UsState`의 값을 들고 있음
+
 ~~~rust
 #[derive(Debug)]
 enum UsState {
@@ -220,6 +246,7 @@ fn value_in_cents(coin: Coin) -> u32 {
 ~~~
 
 ### IV. `Option<T>`를 이용하는 매칭
+
 ~~~rust
 fn plus_one(x: Option<i32>) -> Option<i32> {
   match x {
@@ -234,6 +261,7 @@ let none = plus_one(None);
 ~~~
 
 ### V. `match` 규칙
+
 ~~~rust
 fn plus_one(x: Option<i32>) -> Option<i32> {
   match x {
@@ -241,12 +269,15 @@ fn plus_one(x: Option<i32>) -> Option<i32> {
   }
 }
 ~~~
+
 * `match`는 하나도 빠트리면 안됨
 * 위의 예제의 경우 `None`을 다루지 않았기 때문에 컴파일 에러
 
 ### VI. `_`변경자(placeholder)
+
 * `else`키워드와 같은 개념
 * 나머지 패턴들을 모두 체크
+
 ~~~rust
 let some_u8_value = 0u8;
 match some_u8_value {
@@ -259,8 +290,11 @@ match some_u8_value {
 ~~~
 
 ## 3. `if let`을 사용한 간결한 흐름 제어
+
 ### I. `if let`
-* 기존 코드
+
+#### 기존 코드
+
 ~~~rust
 let some_u8_value = Some(0u8);
 match some_u8_value {
@@ -268,7 +302,9 @@ match some_u8_value {
   _ => (),
 }
 ~~~
-* `if let` 사용
+
+#### `if let` 사용
+
 ~~~rust
 if let Some(3) = some_u8_value {
   println!("three");
@@ -276,7 +312,9 @@ if let Some(3) = some_u8_value {
 ~~~
 
 ### II. `if let`과 `else`
-* 기존 코드
+
+#### 기존 코드
+
 ~~~rust
 let mut count = 0;
 match coin {
@@ -284,7 +322,9 @@ match coin {
   _ => count += 1,
 }
 ~~~
-* `if let` `else`를 사용
+
+#### `if let` `else`를 사용
+
 ~~~rust
 let mut count = 0;
 if let Coin::Quarter(state) = coin {

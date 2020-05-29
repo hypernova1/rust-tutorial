@@ -5,7 +5,9 @@
 [3. 메소드 문법](#3-메소드-문법)  
 
 ## 1. 구조체를 정의하고 생성하기
+
 ### I. 구조체 정의
+
 ~~~rust
 struct User {
   username: String,
@@ -14,9 +16,11 @@ struct User {
   active: bool,
 }
 ~~~
+
 * 구조체의 구성요소들은 각각 다른 타입을 가질 수 있음
 
 ### II. 구조체의 인스턴스 생성
+
 ~~~rust
 let user1 = User {
   email: String::from("hypemova@gmail.com"),
@@ -25,10 +29,12 @@ let user1 = User {
   sign_in_count: 1,
 }
 ~~~
+
 * 프로퍼티 읽기: `.` 사용 ex) `user1.email;`
 * 프로퍼티 변경: `.` 사용 ex) `user1.email = String::from("chtlstjd01@naver.com");`
 
 ### III. 구조체 갱신법(`..`)
+
 ~~~rust
 let user2 = User {
   email: String::from("another@gmail.com"),
@@ -38,7 +44,9 @@ let user2 = User {
 ~~~
 
 ### IV. 튜플 구조제
+
 * 이름이 없고 필드마다 타입이 다름
+
 ~~~rust
 struct Color(i32, i32, i32);
 struct Point(i32, i32, i32);
@@ -65,7 +73,7 @@ let origin = Point(0, 0, 0);
 >     active: true,
 >     sign_in_count: 1,
 >   };
-> 
+>
 > }
 > ~~~
 > ~~~
@@ -81,11 +89,13 @@ let origin = Point(0, 0, 0);
 >3 |     email: &str,
 >  |            ^ expected lifetime parameter
 > ~~~
-> * 10 장에서 설명함
+
+* 10 장에서 설명
 
 ## 2. 구조체를 이용한 예제 프로그램
 
 ## 3. 메소드 문법
+
 * 메소드는 함수와 유사
 * `fn` 키워드로 선언
 * 함수와 달리 구조체의 내용 안에 정의
@@ -93,6 +103,7 @@ let origin = Point(0, 0, 0);
   * `self`: 메소드가 호줄되고 있는 구조체의 인스턴스를 가리킴
 
 ### I. 메소드 정의
+
 ~~~rust
 #[derive(Debug)]
 struct Rectangle {
@@ -126,6 +137,7 @@ fn main() {
 >   * 자동 참조 동작은 메소드가 명확한 수신자(`self`)를 가지고 있기 때문임
 
 ### II. 더 많은 파라미터를 가진 메소드
+
 ~~~rust
 
 impl Rectangle {
@@ -151,6 +163,7 @@ fn main() {
 ~~~
 
 ### III. 연관 함수
+
 * `self`파라미터를 갖지 않는 함수
 * 주로 구조체의 인스턴스를 반환하는 생성자로 사용됨
 
