@@ -76,7 +76,7 @@ fn main() {
     let listener = TcpListener::bind("localhost:7878").unwrap();
     let pool = ThreadPool::new(4);
 
-    for stream in listener.incoming() {
+    for stream in listener.incoming().take(2) {
         let stream = stream.unwrap();
 
         pool.execute(|| {
