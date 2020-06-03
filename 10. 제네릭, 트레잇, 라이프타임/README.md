@@ -329,3 +329,226 @@ fn main() {
   let float = Option_f64(5.0);
 }
 ~~~
+
+## 2. 트레잇
+
+* 공유 동작 정의
+* 타 언어의 인터페이스와 유사하지만 몇가지 다른 점이 있음
+
+### I. 정의하기
+
+~~~rust
+pub trait Summarizable {
+  fn summary() -> String;
+}
+~~~
+
+### II. 특정 타입에 대한 트레잇 구현
+
+~~~rust
+pub struct NewsArticle {
+  pub headline: String,
+  pub location: String,
+  pub author: String,
+  pub content: String,
+}
+
+impl Summarizable for NewsArticle {
+  fn summary(&self) -> String {
+    format!("{}, by {} ({})", self.headline, self.author, self.location)
+  }
+}
+
+pub struct Tweet {
+  pub username: String,
+  pub content: String,
+  pub reply: bool,
+  pub retweet: bool,
+}
+
+impl Summarizable for Tweet {
+  fn summary(&self) -> String {
+    format!("{}: {}", self.username, self.content)
+  }
+}
+~~~
+
+#### 메소드 호출
+
+~~~rust
+let tweet = Tweet {
+  username: String::from("horse_ebooks"),
+  content: String::from("of course, as you probably already know, people"),
+  reply: false,
+  retweet: false,
+}
+
+println!("1 new tweet: {}", tweet.summary());
+~~~
+
+#### 다른 스코프에 있는 트레잇 호출
+
+~~~rust
+extern crate aggregator;
+
+use aggregator::Summarizable;
+
+struct WeatherForecast {
+  high_temp: f64,
+  low_temp: f64,
+  chance_of_precipitation: f64,
+}
+
+impl Summarizable for WeatherForecast {
+  fn summary(&self) -> String {
+    format!("The high will be {}, and the low will be {}. The chanch of precipitation is {}%", self.high_temp, self.low_temp, self.chance_of_precipitation)
+  }
+}
+~~~
+
+* `aggregator` 크레이트로부터 다른 크레이트 내의 스코프로 `Summarizable` 트레잇 가져오기
+* 트레잇 및 타입이 해당 크레이트 내의 것일 경우에만 해당 타입에서의 트레잇을 정의할 수 있음
+* 외부 타입에 대한 외부 트레잇 구현은 허용되지 않음
+
+~~~rust
+impl Display for Vec {} //불가능
+~~~
+
+#### 기본 구현
+
+~~~rust
+pub trait Summarizable {
+  fn summary(&self) -> String {
+    String::from("(Read more...)")
+    //가본 동작을 구현하여 그대로 사용하거나 오버라이딩 하도록 함
+  }
+}
+
+impl Summarizable for NewsArticle {}
+
+fn main() {
+  let article = NewsArticle {
+    headline: String::from("Penguins win the Stanley Cup Championship!"),
+    location: String::from("Pittsburgh, PA, USA"),
+    author: String::from("Iceburgh"),
+    content: String::from("The Pittsburgh Penguins once again are the best hockey team in the NHL."),
+  };
+
+  println!("New article available! {}", article.summary()); //(Read more...) 출력
+}
+~~~
+
+#### 기본 구현이 되어있지 않은 메소드 호출
+
+~~~rust
+pub trait Summarizable {
+  fn author_summary(&self) -> String;
+
+  fn summary(&self) -> String {
+    format!("(Read more from {}...)", self.author_summary())
+  }
+}
+
+impl Summarizable for Tweet {
+  fn author_summary(&self) -> String {
+    format!("@{}", self.username)
+  }
+}
+
+fn main() {
+  let tweet = Tweet {
+    username: String::from("horse_ebooks"),
+    content: String::from("of course, as you probably already know, people"),
+    reply: false,
+    retweet: false,
+  };
+
+  println!("1 new tweet: {}", tweet.summary());
+}
+~~~
+
+### III. 트레잇 바운드
+
+* 제네릭 타입에 제약을 가하고 제네릭이 특정한 트레잇을 구현하여 트레잇이 가지고 있는 동작을 사용할 수 있게 함
+
+~~~rust
+pub fn notify<T: Summarizable>(item: T) {
+  println!("Breaking news! {}", item.summary());
+}
+
+//+를 이용하면 여러개의 트레잇 바운드 특정 가능
+fn some_function()<T: Display + Clone, U: Clone + Debug>(t: T, u: U) -> i32 {
+  //...
+}
+
+//where 절을 이용하여 작성
+fn some_function<T, U>(t: T, u: U) -> i32
+  where T: Display + Clone,
+        U: Clone + Debug
+{
+  //...
+}
+~~~
+
+### IV. 트레잇 바운드를 이용하여 `largest` 함수 고치기
+
+#### 값을 비교하기 위하여 트레잇 바운드 내에 `PartialOrd` 를 특정
+
+~~~rust
+fn largest<T: PartialOrd>(list: &[T]) -> T {
+  //...
+}
+~~~
+
+#### 컴파일시
+
+~~~
+error[E0508]: cannot move out of type `[T]`, a non-copy array
+ --> src/main.rs:4:23
+  |
+4 |     let mut largest = list[0];
+  |         -----------   ^^^^^^^ cannot move out of here
+  |         |
+  |         hint: to prevent move, use `ref largest` or `ref mut largest`
+
+error[E0507]: cannot move out of borrowed content
+ --> src/main.rs:6:9
+  |
+6 |     for &item in list.iter() {
+  |         ^----
+  |         ||
+  |         |hint: to prevent move, use `ref item` or `ref mut item`
+  |         cannot move out of borrowed content
+~~~
+
+* `i32`, `char` 같은 고정된 크기의 타입(Copy 트레잇이 구현된)이 아닌 타입들의 소유권을 파라미터로 옮기지 못하여 발생하는 에러
+
+#### 수정
+
+~~~rust
+use std::cmp::PartialOrd;
+
+fn largest<T: PartialOrd + Copy>(list: &[T]) -> T {
+  let mut largest = list[0];
+
+  for &item in list.iter() {
+    if item > largest {
+      largest = item;
+    }
+  }
+
+  largest
+}
+
+fn main() {
+  let numbers = vec![34, 50, 25, 100, 65];
+
+  let result = largest(&numbers);
+  println!("The largest number is {}", result);
+
+  let chars = vec!['y', 'm', 'a', 'q'];
+
+  let result = largest(&chars);
+  println!("The largest char is {}", result);
+}
+~~~
