@@ -552,3 +552,323 @@ fn main() {
   println!("The largest char is {}", result);
 }
 ~~~
+
+## 3. 라이프타임
+
+* 해당 참조자가 유효한 스코프
+* 대부분의 경우에 암묵적이며 추론됨
+* 명시해야하는 경우에는 제네릭 라이프타임 파라미터를 이용하여 관계를 명시
+
+### I. 댕글링 참조자 방지
+
+~~~rust
+  {
+    let r;
+
+    {
+      let x = 5;
+      r = &x;  
+    }
+  }
+
+  println!("r {}", r);
+~~~
+
+#### 컴파일시
+
+~~~
+error: `x` does not live long enough
+   |
+6  |         r = &x;
+   |              - borrow occurs here
+7  |     }
+   |     ^ `x` dropped here while still borrowed
+...
+10 | }
+   | - borrowed value needs to live until here
+~~~
+
+* 변수 x는 내부 스코프가 종료되면 drop되기 때문에 r보다 오래 살지 못함
+* 따라서 r은 댕글링 참조자가 됨
+
+### II. 빌림 검사기(Borrow checker)
+
+* 모든 빌림이 유효한지 결정하기 위해 스코프를 비교
+
+~~~rust
+{
+  let r                   // -------+-- 'a
+                          //        |
+  {                       //        |
+    let x = 5;            // -+-----+-- 'b
+    r = &x;               //  |
+  }                       // -+
+                          //  |
+  println!("r: {}", r);   //  |  
+}                         // -+
+~~~
+
+* `x`의 라이프타임인 `'b` 블록은 `r`의 라이프타임인 `'a` 블록보다 훨씬 작기 때문에 컴파일 오류 발생
+
+~~~rust
+{
+  let x = 5;            // -----+-- 'b
+                        //      |
+  let r = &x;           // --+--+-- 'a
+                        //   |  |
+  println!("r: {}", r); //   |  |
+                        // --+  |
+}                       // -----+
+~~~
+
+* `x`의 라이프타임이 `r`의 라이프 타임보다 길기 때문에 `r`의 참조자가 언제나 유효함
+
+### III. 함수에서의 제네릭 라이프타임
+
+#### 두 스트링 슬라이스 중 길이가 긴 스트링 슬라이스를 반환하는 함수
+
+~~~rust
+fn main() {
+  let string1 = String::from("abcd");
+  let string2 = "xyz";
+
+  let result = longest(string.as_str(), string2);
+  println!("The longest string is {}", result);
+}
+
+fn longest(x: &str, y: &str) -> &str {
+  if x.len() > y.len() {
+    x
+  } else {
+    y
+  }
+}
+~~~
+
+#### 컴파일시
+
+~~~
+error[E0106]: missing lifetime specifier
+   |
+1  | fn longest(x: &str, y: &str) -> &str {
+   |                                 ^ expected lifetime parameter
+   |
+   = help: this function's return type contains a borrowed value, but the
+   signature does not say whether it is borrowed from `x` or `y`
+~~~
+
+* 반환되는 참조자가 `x` 를 참조하는 지 `y` 를 참조하는 지 알 수 없기 때문에 참조자를 명시해야함
+
+#### 라이프타임 명시 문법
+
+* 라이프타임 명시는 연관된 참조자의 생명주기를 바꾸는 것이 아님
+* 함수의 시그니처가 제네릭 타입 파라미터를 특정할 때라면 어떤 라이프타임을 가진 참조자라도 허용
+* 라이프타임을 명시하는 것은 여러개의 참조자에 대한 라이프타임들을 서로 연관짓도록 하는 것
+
+~~~rust
+&i32        //참조자
+&'a i32     //라이프타임 참조자
+&'a mut i32 //가변 라이프타임 참조자
+~~~
+
+#### 함수 시그니처 내의 라이프타임 명시
+
+~~~rust
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+  if x.len() > y.len() {
+    x
+  } else {
+    y
+  }
+}
+~~~
+
+* 시그니처 내의 모든 참조자들이 동일한 라이프타임 `'a` 가져야한다고 명시
+* 라이프타임 명시는 시그니처에만 있으며 함수 내부에선 쓰지 않음
+
+#### 라이프타임이 다른 참조자를 사용하여 함수 호출
+
+~~~rust
+fn main() {
+  let string1 = String::from("long string is long");
+
+  {
+    let string2 = String::from("xyz");
+    let result = longest(string.as_str(), string2.as_str());
+    println!("The longest string is {}", result);
+  }
+}
+~~~
+
+* 두 스트링의 라이프타임이 달라서 컴파일 오류 발생
+
+#### `result`의 선언부를 내부 스코프 밖으로 옮겼을 때
+
+~~~rust
+fn main() {
+  let string1 = String::from("long string is long");
+  let result;
+  {
+    let string2 = String::from("xyz");
+    result = longest(string1.as_str(), string2.as_str());
+  }
+  println!("The longest string is {}", result);
+}
+~~~
+
+#### 컴파일 에러
+
+~~~
+error: `string2` does not live long enough
+   |
+6  |         result = longest(string1.as_str(), string2.as_str());
+   |                                            ------- borrow occurs here
+7  |     }
+   |     ^ `string2` dropped here while still borrowed
+8  |     println!("The longest string is {}", result);
+9  | }
+   | - borrowed value needs to live until here
+~~~
+
+* `result`가 `println!`에서 유효하려면 `string2`가 외부 스코프 끝까지 유효해야하는데 내부 블록에서 drop되었기 때문
+
+### IV. 라이프타임의 측면에서 생각하기
+
+#### 라이프타임 생략
+
+~~~rust
+fn longest<'a>(x: &'a str, y: &str) -> &'a str {
+  x
+}
+~~~
+
+* `y`는 `x` 혹은 반환 값의 라이프타임과 관련이 없기 때문에 라이프타임 생략 가능
+
+~~~rust
+fn longest<'a>(x: &str, y: &str) -> &'a str {
+  let result = String::from("really long string");
+  result.as_str()
+}
+~~~
+
+#### 컴파일시
+
+~~~
+error: `result` does not live long enough
+  |
+3 |     result.as_str()
+  |     ^^^^^^ does not live long enough
+4 | }
+  | - borrowed value only lives until here
+  |
+note: borrowed value must be valid for the lifetime 'a as defined on the block
+at 1:44...
+  |
+1 | fn longest<'a>(x: &str, y: &str) -> &'a str {
+  |                                             ^
+~~~
+
+* `result`는 함수가 종료되면서 drop이 되어 메모리 해제가 발생하기 때문에 댕글링 포인터를 반환
+* 반환 타입에 대해 `'a`를 특정했지만 파라미터의 라이프타임과 관련이 없기 때문에 컴파일 에러
+
+
+### V. 구조체 정의 상에서 라이프타임 명시
+
+#### 참조자를 소유하고 있는 구조체
+
+~~~rust
+struct ImportantExcerpt<'a> {
+  part: &'a str,
+}
+
+fn main() {
+  let novel = String::from("Call me Ishmeal. Some years ago...");
+  let first_sentence = novel.split(".");
+      .next()
+      .unwrap();
+
+  let i = ImportantExcerpt { part: first_sentence };
+}
+~~~
+
+### VI. 라이프타임 생략
+
+~~~rust
+fn first_word(s: &str) -> &str {
+  let bytes = s.as_str();
+
+  for (i, &item) in bytes.iter().enumerate() {
+    if item = b' ' {
+      return &s[0..i]
+    }
+  }
+
+  &s[..]
+}
+~~~
+
+* 러스트 1.0 이전의 버전에선 위의 코드는 컴파일 되지 않아 아래 처럼 라이프타임을 명시해줘야 했음
+
+~~~rust
+fn first_word<'a>(s: &'a str) -> &'a str {
+~~~
+
+* 하지만 특정한 상황에서 이러한 코드를 많이 작성하는 것을 알게 되고 그후 빌림 검사기가 라이프타임을 추론할 수 있도록 바뀌었음
+
+#### 라이프타임 생략 규칙
+
+1. 참조자인 각각의 파라미터는 고유한 라이프타임 파라미터를 가짐
+2. 만약 하나의 라이프타임 파라미터만 있다면 그 라이프타임이 모든 출력 라이프타임 파라미터에게 대입됨
+3. 메소드에서 여러개의 입력 라이프타임이 있고 그 중 하나가 `&self` 혹은 `&mut self`라면 `self`라이프타임이 모든 출력 라이프타임 파라미터에 대입됨
+
+### VII. 메소드 정의 내에서의 라이프타임 명시
+
+~~~rust
+impl<'a> InportantExcerpt {
+  fn level(&self) -> i32 {
+    3
+  }
+}
+~~~
+
+* 첫 번째 생략 규칙에 의해 `self`로의 참조자의 라이프타임 명시 생략
+
+~~~rust
+impl<'a> ImportantExperpt<'a> {
+  fn announce_and_return_part(&self, announcement: &str) -> &str {
+    println!("Attention please: {}", announcement);
+    self.part
+  }
+}
+~~~
+
+* 첫 번째 생략 규칙에 의해 `self`와 `announcement`에 각각 라이프타임 부여
+* 파라미터중 하나가 `&self`이므로 반환 타입은 `&self`의 라이프타임을 얻음
+
+### VIII. 정적 라이프타임(static lifetime)
+
+* 프로그램의 전체 라이프사이클을 가리킴
+* 모든 스트링 리터럴의 라이프타임
+* 스트링 리터럴은 프로그램의 바이너리 내에 직접 저장되어 항상 이용 가능
+* 아래와 같이 명시적으로 선언 가능
+
+~~~rust
+let s: &'static str = "I have a static lifetime";
+~~~
+
+### IX. 제네릭 파라미터, 트레잇 바운드, 라이프타임을 함께 쓰기
+
+~~~rust
+use std::fmt::Display;
+
+fn longest_with_an_announcement<'a, T>(x: &'a str, y: &'a str, ann: T) -> &'a str
+    where T: Display
+{
+  println!("Announcement! {}", ann);
+  if x.len() > y.len() {
+    x
+  } else {
+    y
+  }
+}
+~~~
